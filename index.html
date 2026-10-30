@@ -743,6 +743,12 @@ button.me{cursor:pointer}
 .hb-demo b{display:inline-block;min-width:1.6em;background:#3b6fd8;color:#fff;border-radius:99px;padding:0 8px}
 .hb-demo b:nth-of-type(n+2){background:#2f9e68}
 @media (min-width:700px){.hb-order{font-size:22px}.hb-order b{font-size:32px}}
+/* Catapult Siege */
+#siege{position:fixed;inset:0;z-index:60;background:linear-gradient(180deg,#5fb4f2 0%,#a9dcff 60%,#e3f5ff 100%);touch-action:none;user-select:none;-webkit-user-select:none;overflow:hidden;display:flex;flex-direction:column}
+.sg-sky{position:absolute;inset:0;pointer-events:none}
+.sg-sun{position:absolute;left:6%;top:14%;font-size:56px}
+.sg-cloud{position:absolute;font-size:64px;opacity:.9;animation:sgDrift 48s linear infinite}
+@keyframes sgDrift{from{transform:translateX(-30vw)}to{transform:translateX(110vw)}}
 
 /* generated: weapon and shield counter-rotation */
 @keyframes c_aBowR{0%,100%{transform:rotate(0deg)}30%,70%{transform:rotate(-58deg)}}
@@ -1131,7 +1137,7 @@ function mergeFrom(c){ // combine progress from two devices: nothing earned on e
   if(c.streak&&(c.streak.count||0)>(S.streak.count||0))S.streak=c.streak;
   for(const k of['giftDay','drawDay','challengeDay'])if((c[k]||'')>(S[k]||''))S[k]=c[k];
   if(!S.danceMove&&c.danceMove)S.danceMove=c.danceMove;
-  if(c.bonus){const b=S.bonus||(S.bonus={});b.best=Math.max(b.best||0,c.bonus.best||0);b.plays=Math.max(b.plays||0,c.bonus.plays||0);if((c.bonus.day||'')>(b.day||'')){b.day=c.bonus.day;b.today=c.bonus.today||0}if(!b.passes&&c.bonus.passes)b.passes=c.bonus.passes}
+  if(c.bonus){const b=S.bonus||(S.bonus={});b.best=Math.max(b.best||0,c.bonus.best||0);b.plays=Math.max(b.plays||0,c.bonus.plays||0);b.hbBest=Math.max(b.hbBest||0,c.bonus.hbBest||0);b.hbPlays=Math.max(b.hbPlays||0,c.bonus.hbPlays||0);b.realms=[...new Set([...(Array.isArray(b.realms)?b.realms:[]),...(Array.isArray(c.bonus.realms)?c.bonus.realms:[])])];if(!b.passes&&c.bonus.passes)b.passes=c.bonus.passes}
   const base=S.baseYarn==null?Math.min(S.yarn,c.yarn||0):S.baseYarn;
   S.yarn=Math.max(0,S.yarn+(c.yarn||0)-base);
 }
@@ -2107,7 +2113,8 @@ function practiceView(){
   const quick=(k,i,t,p)=>`<div class="pcard"><div class="pi">${i}</div><div class="grow"><h3>${t}</h3><p>${p}</p></div><button class="btn" data-act="quick" data-k="${k}">Play</button></div>`;
   const ddojo=`<div class="pcard col"><div class="row" style="justify-content:flex-start"><div class="pi">➗</div><div class="grow"><h3>Division Arena</h3><p>Train sharing facts. Each one is a times-table fact turned around!</p></div></div>
   <div class="tables">${range(2,12).map(t=>{const k=divStrong(t);return `<button class="tbtn" data-act="dtable" data-t="${t}">÷${t}<small>${k}/12 strong</small><span class="minibar"><i style="width:${k/12*100}%"></i></span></button>`}).join('')}</div></div>`;
-  return '<h2 class="sec">Training</h2>'+bonusCard()+dojo+ddojo+quick('dec','🥧','Decimals','Tenths, hundredths, money and comparing.')+quick('mixed4','🎪','All four mixed','+ − × ÷ and two-step stories.')+garden+light;
+  const blade=`<div class="pcard"><div class="pi">⚔️</div><div class="grow"><h3>Halving Blade</h3><p>Slice falling numbers in half: 7 → 3.5 + 3.5. Your best: <b>${bonusState().hbBest}</b></p></div><button class="btn sun" data-act="blade">Play</button></div>`;
+  return '<h2 class="sec">Training</h2>'+blade+dojo+ddojo+quick('dec','🥧','Decimals','Tenths, hundredths, money and comparing.')+quick('mixed4','🎪','All four mixed','+ − × ÷ and two-step stories.')+garden+light;
 }
 
 
@@ -2274,7 +2281,8 @@ function parentsView(){
    <li><b>No time pressure by default</b> (Boaler: timed tests drive maths anxiety). The Lightning Round is optional, and players only race their own best score.</li>
    <li><b>Self-Determination Theory.</b> Autonomy (they pick the realm, table and gear), competence (stars, mastery bars) and relatedness (a named knight who cheers them on).</li>
    <li><b>Game loop, made kind.</b> Short 2–4 minute levels, 3-star ratings, a level map, combos, mystery gifts, a sticker collection and a daily gift. There are <b>no</b> lives in the maths, no losing, no ads and no purchases. A missed day is forgiven, and a break reminder pops up after a set time.</li>
-   <li><b>Bonus game, earned not given: Halving Blade.</b> Numbers from 1 to 100 fall down the screen and a swipe cuts one in half. Even numbers split into whole halves (8 → 4 + 4), odd numbers into decimals (7 → 3.5 + 3.5), and each half hops up and can be cut again (3.5 → 1.75 + 1.75), up to 4 cuts or 3 decimal places. Every cut shows the sum, such as 7 ÷ 2 = 3.5, and blacksmith orders ask for one exact half, so players work out halving chains like 25 → 12.5 → 6.25. It unlocks only after ${BONUS.mins.big} minutes of learning with ${BONUS.right.big} right answers. Only time spent answering counts, a 20-minute break restarts the count, and it is limited to ${BONUS.perDay} plays a day. A round lasts a minute. ${S.bonus&&S.bonus.plays?`Played ${S.bonus.plays} time${S.bonus.plays>1?'s':''} so far, best score ${S.bonus.best}.`:''}</li>
+   <li><b>Halving Blade, in Training any time.</b> Numbers from 1 to 100 fall down the screen and a swipe cuts one in half. Even numbers split into whole halves (8 → 4 + 4), odd numbers into decimals (7 → 3.5 + 3.5), and each half hops up and can be cut again (3.5 → 1.75 + 1.75), up to 4 cuts or 3 decimal places. Every cut shows the sum, such as 7 ÷ 2 = 3.5, and blacksmith orders ask for one exact half, so players work out halving chains like 25 → 12.5 → 6.25. A round lasts a minute. ${S.bonus&&S.bonus.hbPlays?`Played ${S.bonus.hbPlays} time${S.bonus.hbPlays>1?'s':''} so far, best score ${S.bonus.hbBest}.`:''}</li>
+   <li><b>Bonus game, earned not given: Catapult Siege.</b> A one-minute game with no maths in it: fling boulders at goblins on a crumbling castle. A play is earned only by beating a realm's guardian (level 7) for the first time, so there is one per realm, and unused plays are saved. ${S.bonus&&S.bonus.plays?`Played ${S.bonus.plays} time${S.bonus.plays>1?'s':''} so far, best score ${S.bonus.best}.`:''}</li>
    <li><b>Victory move.</b> Moves bought with gold can be picked in the Armoury. The knight does it at the end of every level.</li>
    <li><b>Tips:</b> 10–15 minutes a day works better than one long session. Ask them to teach <i>you</i> a strategy. Celebrate effort and the tricky facts they conquer.</li>
   </ul></div>`;
@@ -2296,7 +2304,7 @@ function renderOnboard(){
   app.innerHTML=`<div class="onb">${catHTML(cs(160),'happy',{fur,equipped:kit,cls:'idle'})}<div class="story"><b>Welcome to Warrior Academy, ${esc(UI.tmpName)}!</b><br><br>
    Long ago, the Number Knights kept the Kingdom of Numeria safe. Now a dark fog has rolled over the land, and the realm guardians have turned grumpy and wild. 🌫️<br><br>
    Only a true <b>Warrior of Numbers</b> can win them back. Every maths problem you solve makes ${esc(UI.tmpCat)} stronger.
-   <ul><li>✖️ Master your maths, realm by realm</li><li>💎 Make all 11 Times Table Crystals glow</li><li>🛡️ Earn gold for armour, swords and shields</li><li>🎉 Learn victory moves</li><li>⭐ Earn up to 3 stars on every level</li><li>⚔️ Unlock the Halving Blade bonus game</li><li>🎁 Open a mystery gift after every level</li><li>💪 Mistakes are fine. They're how warriors get stronger!</li></ul></div>
+   <ul><li>✖️ Master your maths, realm by realm</li><li>💎 Make all 11 Times Table Crystals glow</li><li>🛡️ Earn gold for armour, swords and shields</li><li>🎉 Learn victory moves</li><li>⭐ Earn up to 3 stars on every level</li><li>⚔️ Slice numbers in half in Halving Blade</li><li>🏰 Beat guardians to unlock Catapult Siege</li><li>🎁 Open a mystery gift after every level</li><li>💪 Mistakes are fine. They're how warriors get stronger!</li></ul></div>
    <button class="btn big" data-act="obgo" data-primary>Begin the quest! ⚔️</button></div>`;
 }
 
@@ -2474,7 +2482,7 @@ function submit(val){
   if(same(val,q.ans)){
     const first=P.tries===0&&!P.hintUsed,credit=P.tries===0?(P.hintUsed?.5:1):.5;
     if(!q.requeued)P.credits.push(credit);
-    recordFact(q,first);checkCrystals(q);S.stats.answered++;if(first)S.stats.firstTry++;bonusRight();
+    recordFact(q,first);checkCrystals(q);S.stats.answered++;if(first)S.stats.firstTry++;
     if(P.tries>0||q.requeued)P.fixed++;
     P.combo=first?P.combo+1:0;P.maxCombo=Math.max(P.maxCombo,P.combo);S.stats.bestCombo=Math.max(S.stats.bestCombo,P.combo);
     if(P.combo>=5)badge('combo5');if(P.combo>=10)badge('combo10');
@@ -2530,7 +2538,7 @@ function useHint(){
 }
 function lightningSubmit(val,q){
   const a=$('#ans');P.locked=true;
-  if(same(val,q.ans)){P.score++;bonusRight();recordFact(q,true);checkCrystals(q);S.stats.answered++;S.stats.firstTry++;P.combo++;sfx.correct(Math.min(P.combo,12));
+  if(same(val,q.ans)){P.score++;recordFact(q,true);checkCrystals(q);S.stats.answered++;S.stats.firstTry++;P.combo++;sfx.correct(Math.min(P.combo,12));
     if(a){a.classList.add('right');const r=a.getBoundingClientRect();burst(r.left+r.width/2,r.top+r.height/2,['⚡','✨'],6)}
     setTimeout(lnext,220)}
   else{P.combo=0;sfx.wrong();recordFact(q,false);S.stats.answered++;if(a){a.textContent=q.ans;a.classList.add('reveal')}setTimeout(lnext,900)}
@@ -2557,6 +2565,7 @@ function finishLevel(){
   const stars=sc>=.9?3:sc>=.65?2:1,id=lid(P.r,P.l),prev=S.stars[id]||0;
   const beforeRank=rankInfo().i,beforeUnl=REALMS.map((_,i)=>realmUnlocked(i));
   S.stars[id]=Math.max(prev,stars);
+  if(P.l===R.levels.length-1)bonusRealmDone(R.id);
   const bonus=5+stars*5+(prev?0:10);S.yarn+=bonus;P.yarn+=bonus;S.stats.levels++;
   badge('first');if(stars===3)badge('perfect');if(L.boss)badge('r_'+R.id);
   save();
@@ -2629,38 +2638,179 @@ function openScratch(){
 }
 function closeScratch(silent){const s=$('#scratch');if(s)s.remove();if(silent&&P&&P.scratchFor!==P.i)P.scratch=null}
 
-/* ---------------- bonus game: Halving Blade ----------------
-   Earned, never handed out: a play pass needs a stretch of real learning (minutes spent answering, plus enough right answers).
-   At most 2 passes a day and 3 saved up. A break of 20+ minutes starts the stretch again.
-   Numbers fall. A swipe cuts one into two halves that hop apart and keep falling, so each half can be cut again:
-   8 → 4 + 4, 7 → 3.5 + 3.5, 3.5 → 1.75 + 1.75. A piece stops splitting after 4 cuts, or when halving it would need
-   more than 3 decimal places, and shatters into gold instead. Blacksmith orders ask for one exact half (6.25, say),
-   so the player has to spot which falling number halves down to it. */
-const BONUS={mins:{little:10,middle:15,big:15},right:{little:15,middle:25,big:30},perDay:2,maxHeld:3,resetMins:20};
-function bonusState(){if(!S.bonus||typeof S.bonus!=='object')S.bonus={};const b=S.bonus,t=dayKey();for(const k of['learn','right','passes','today','best','last','plays'])b[k]=b[k]||0;if(b.day!==t){b.day=t;b.today=0}return b}
-function bonusNeed(){const bd=band();return{secs:BONUS.mins[bd]*60,right:BONUS.right[bd]}}
-function bonusCapped(){const b=bonusState();return b.today>=BONUS.perDay||b.passes>=BONUS.maxHeld}
-function bonusTick(){const b=bonusState(),now=Date.now();
-  if(UI.screen==='play'&&P&&P.lastAns&&now-P.lastAns<45000){b.learn+=10;b.last=now;bonusCheck()}
-  else if(b.last&&now-b.last>BONUS.resetMins*60000&&(b.learn||b.right)&&!bonusCapped()){b.learn=0;b.right=0}}
-function bonusRight(){const b=bonusState();b.right++;bonusCheck()}
-function bonusCheck(){const b=bonusState(),n=bonusNeed();if(bonusCapped()){b.learn=Math.min(b.learn,n.secs);return}
-  if(b.learn>=n.secs&&b.right>=n.right){b.passes++;b.today++;b.learn=0;b.right=0;UI.passNew=true;save();
-    toast(`<span class="ti">🎟️</span><div><b>Bonus game earned!</b><br>Finish this round, then play Halving Blade from the map.</div>`);sfx.fanfare()}}
-function bonusCard(){const b=bonusState(),n=bonusNeed();
-  if(b.passes>0)return `<div class="bonuscard ready"><div class="bi">⚔️</div><div class="grow"><b>Halving Blade</b><div class="tiny">You earned ${b.passes} bonus play${b.passes>1?'s':''} by learning! 🎟️</div></div><button class="btn sun" data-act="bonus">Play ▶</button></div>`;
-  if(bonusCapped())return `<div class="bonuscard"><div class="bi">🌙</div><div class="grow"><b>Halving Blade</b><div class="tiny">You earned today's bonus games. Mighty learning! More tomorrow.</div></div></div>`;
-  const p=Math.min(b.learn/n.secs,b.right/n.right,1);
-  return `<div class="bonuscard" data-act="bonus" role="button"><div class="bi">🔒</div><div class="grow"><b>Bonus game: Halving Blade</b><div class="meter"><i style="width:${Math.round(p*100)}%"></i></div><div class="tiny">Unlocks after ${n.secs/60} minutes of learning with ${n.right} right answers: ${Math.floor(b.learn/60)}/${n.secs/60} min · ${Math.min(b.right,n.right)}/${n.right} right</div></div></div>`}
-function passBanner(){if(!UI.passNew)return '';UI.passNew=false;return `<div class="passban">🎟️ <b>You earned a bonus game!</b> <button class="chip" data-act="bonus">Play Halving Blade ▶</button></div>`}
+/* ---------------- bonus game: Catapult Siege ----------------
+   Earned, never handed out: finishing a realm's last level (its guardian, level 7) for the first time wins one play, saved up until used.
+   Pure fun, no maths. Pull back anywhere to aim, let go to fling a boulder. Goblins pop up on a stone castle that
+   crumbles block by block, a dragon sometimes flies over for a big bonus, and the wind changes to bend each shot. */
+function bonusState(){if(!S.bonus||typeof S.bonus!=='object')S.bonus={};const b=S.bonus;for(const k of['passes','best','plays','hbBest','hbPlays'])b[k]=b[k]||0;if(!Array.isArray(b.realms))b.realms=[];return b}
+function bonusRealmDone(id){const b=bonusState();if(b.realms.includes(id))return false;b.realms.push(id);b.passes++;UI.passNew=true;save();return true}
+function nextGuardian(){for(const i of realmList()){const R=REALMS[i];if(!bonusState().realms.includes(R.id))return R}return null}
+function bonusCard(){const b=bonusState();
+  if(b.passes>0)return `<div class="bonuscard ready"><div class="bi">🏰</div><div class="grow"><b>Catapult Siege</b><div class="tiny">You won ${b.passes} bonus play${b.passes>1?'s':''} by beating a guardian! 🎟️</div></div><button class="btn sun" data-act="bonus">Play ▶</button></div>`;
+  const ri=UI.tab==='map'&&realmList().includes(UI.realm)?UI.realm:pickStartRealm(),R=REALMS[ri],n=R.levels.length,done=R.levels.filter((_,i)=>S.stars[lid(ri,i)]).length;
+  if(b.realms.includes(R.id))return `<div class="bonuscard" data-act="bonus" role="button"><div class="bi">✅</div><div class="grow"><b>Bonus game: Catapult Siege</b><div class="tiny">You already won ${R.name}'s siege. Beat another guardian to win the next one!</div></div></div>`;
+  return `<div class="bonuscard" data-act="bonus" role="button"><div class="bi">🔒</div><div class="grow"><b>Bonus game: Catapult Siege</b><div class="meter"><i style="width:${Math.round(done/n*100)}%"></i></div><div class="tiny">Clear all ${n} levels of ${R.name} and beat ${R.guardian.name} ${R.guardian.e} to win it! ${done}/${n} levels</div></div></div>`}
+function passBanner(){if(!UI.passNew)return '';UI.passNew=false;setTimeout(()=>{sfx.fanfare();if(readAloud())speak('You beat the guardian! You won a bonus game!')},2400);return `<div class="passban">🎟️ <b>Guardian beaten! You won a bonus game!</b> <button class="chip" data-act="bonus">Play Catapult Siege ▶</button></div>`}
 
+const SG_CFG={dur:60,reload:.5,goblinLife:2.6};
+let SG=null;
+function startBonus(){
+  const b=bonusState();closeModal();
+  if(b.passes<1){const R=nextGuardian();return modal(`<h2>🏰 Catapult Siege</h2><div style="font-size:52px">🪨 👺</div><p>A bonus game you <b>earn</b>: clear a realm's 7 levels and beat its guardian to win a play.</p>${R?`<p class="tiny">Next up: ${R.guardian.e} ${esc(R.guardian.name)} in ${R.icon} ${R.name}.</p>`:''}<button class="btn" data-act="close">OK</button>`)}
+  b.passes--;b.plays++;save();
+  const d=document.createElement('div');d.id='siege';
+  d.innerHTML=`<div class="sg-sky"><span class="sg-sun">☀️</span>${[['10%','6%',0],['20%','40%',-16],['6%','66%',-32]].map(([t,l,dl])=>`<span class="sg-cloud" style="top:${t};left:${l};animation-delay:${dl}s">☁️</span>`).join('')}</div>
+   <div class="tb-hud"><div class="pill">⭐ <b id="sgScore">0</b></div><div class="pill" id="sgWind">🚩 calm</div><button class="xbtn" data-act="sgQuit" aria-label="Stop the game">✕</button></div>
+   <div class="tb-timer"><i id="sgTime"></i></div>
+   <div class="hb-field" id="sgField"><canvas id="sgCv"></canvas></div>
+   <div class="tb-msg" id="sgMsg"><div class="tb-card"><h2>Catapult Siege 🏰</h2>
+    <div class="tb-how"><div><b>👆</b>Pull back anywhere to aim</div><div><b>🪨</b>Let go to fling a boulder</div><div><b>👺</b>Bonk goblins when they pop up</div><div><b>🐉</b>Hit the dragon for a big bonus</div></div>
+    <p class="tiny">Watch the wind flag. It bends your shots!</p>
+    <button class="btn big" data-act="sgGo">Start ▶</button></div></div>`;
+  document.body.appendChild(d);
+  const cv=d.querySelector('#sgCv');
+  SG={run:false,field:d.querySelector('#sgField'),cv,ctx:cv.getContext('2d'),aim:null};
+  const pos=e=>{const r=cv.getBoundingClientRect();return{x:e.clientX-r.left,y:e.clientY-r.top}};
+  cv.addEventListener('pointerdown',e=>{if(!SG||!SG.run)return;e.preventDefault();try{cv.setPointerCapture(e.pointerId)}catch(_){}const p=pos(e);SG.aim={a:p,b:p}});
+  cv.addEventListener('pointermove',e=>{if(SG&&SG.aim)SG.aim.b=pos(e)});
+  const up=()=>{if(!SG||!SG.aim)return;const v=sgVel(SG.aim);SG.aim=null;if(SG.run&&v)sgFire(v)};
+  cv.addEventListener('pointerup',up);cv.addEventListener('pointercancel',()=>{if(SG)SG.aim=null});
+  if(readAloud())speak('Catapult Siege! Pull back to aim, then let go to fling a boulder at the goblins.');
+}
+function sgSize(){const T=SG,W=T.field.clientWidth,H=T.field.clientHeight;if(W===T.W&&H===T.H)return;
+  const dpr=Math.min(2,window.devicePixelRatio||1);T.W=W;T.H=H;T.cv.width=Math.round(W*dpr);T.cv.height=Math.round(H*dpr);T.cv.style.width=W+'px';T.cv.style.height=H+'px';T.ctx.setTransform(dpr,0,0,dpr,0,0);
+  const n=T.cols?T.cols.length:W<500?7:9;
+  T.ground=H*.86;T.g=H*1.6;T.bs=Math.max(14,Math.min(W*.44/n,H*.075));T.x0=W*.97-n*T.bs;T.gr=Math.max(14,T.bs*.75);T.br=Math.max(7,T.bs*.32);
+  T.arm=Math.max(40,Math.min(W,H)*.14);T.piv={x:Math.max(T.arm*1.05,W*.1),y:T.ground-T.arm*.45};
+  T.L={x:T.piv.x+T.arm*Math.sin(.5),y:T.piv.y-T.arm*Math.cos(.5)};
+  T.vmax=1.25*Math.sqrt(T.g*(W*.97-T.L.x));T.pullMax=Math.min(W,H)*.3}
+function sgCastle(drop){const T=SG,n=T.cols?T.cols.length:T.W<500?7:9,hmax=Math.floor((T.ground-T.H*.35)/T.bs),mid=Math.floor(n/2);
+  T.cols=range(0,n-1).map(i=>{const tower=i===0||i===n-1||i===mid,h=Math.min(hmax,rnd(3,4)+(tower?rnd(3,4):0));
+    return range(0,h-1).map(j=>({hp:2,s:rnd(0,3),off:drop?T.H*.7+j*T.bs*.5+i*T.bs*.3:0,v:0}))});
+  T.total=T.cols.reduce((a,c)=>a+c.length,0);T.gobs=[]}
+function sgGo(){if(!SG)return;
+  Object.assign(SG,{W:0,H:0,cols:null,balls:[],gobs:[],fx:[],texts:[],t:0,score:0,shots:0,bonks:0,castles:0,reload:0,swing:0,gobT:1,wind:0,windLvl:0,windNext:0,drag:null,dragNext:12,rebuild:0,dur:SG_CFG.dur,paused:false,shown:-1});
+  sgSize();sgCastle(true);sgWindSet();
+  const m=$('#sgMsg');let n=3;const cd=()=>{if(!SG)return;if(n>0){m.innerHTML=`<div class="tb-count">${n}</div>`;sfx.tap();n--;setTimeout(cd,700)}else{m.innerHTML='';SG.run=true;SG.last=performance.now();requestAnimationFrame(sgLoop)}};cd()}
+function sgWindSet(){const T=SG;T.windLvl=T.t<4?0:rnd(-2,2);T.wind=T.windLvl*T.g*.05;T.windNext=T.t+12;
+  const el=$('#sgWind');if(el)el.textContent=T.windLvl?`🚩 wind ${(T.windLvl>0?'→':'←').repeat(Math.abs(T.windLvl))}`:'🚩 calm'}
+function sgVel(aim){const T=SG,dx=aim.a.x-aim.b.x,dy=aim.a.y-aim.b.y,len=Math.hypot(dx,dy);if(len<14)return null;
+  const s=Math.min(len,T.pullMax)/T.pullMax*T.vmax;return{vx:dx/len*s,vy:dy/len*s,k:Math.min(1,len/T.pullMax)}}
+function sgFire(v){const T=SG;if(T.reload>0)return;
+  T.balls.push({x:T.L.x,y:T.L.y,vx:v.vx,vy:v.vy,hits:0});T.reload=SG_CFG.reload;T.swing=.18;T.shots++;
+  tone(140,.18,'triangle',.12,0,70);tone(420,.08,'square',.03)}
+function sgText(x,y,txt,col='#fff',size=24,life=1.1){SG.texts.push({x,y,txt,col,size,life,max:life})}
+function sgBits(x,y,col,n=8,e=null){const T=SG;for(let i=0;i<n;i++){const a=Math.random()*Math.PI*2,s=(.2+Math.random()*.5)*T.bs*7;
+  T.fx.push({x,y,vx:Math.cos(a)*s,vy:Math.sin(a)*s-T.bs*4,life:.5+Math.random()*.4,col,e:i<(e?3:0)?e:null,sz:T.bs*(.12+Math.random()*.14)})}}
+function sgAdd(n,x,y,txt,col){const T=SG;T.score+=n;sgText(x,y,txt||`+${n}`,col||'#ffd23d',Math.max(18,T.bs*.5));const s=$('#sgScore');if(s)s.textContent=T.score}
+function sgColTop(c){const T=SG,col=T.cols[c];return T.ground-col.length*T.bs-(col.length?col[col.length-1].off:0)}
+function sgGobPos(gb){const T=SG,age=T.t-gb.t0,life=gb.life,k=age<.25?age/.25:age>life-.25?Math.max(0,(life-age)/.25):1;
+  return{x:T.x0+(gb.c+.5)*T.bs,y:sgColTop(gb.c)-T.gr*.9*k,k}}
+function sgSpawnGob(){const T=SG,prog=Math.min(1,T.t/T.dur),busy=new Set(T.gobs.map(g=>g.c));
+  if(T.gobs.length>=3+Math.round(2*prog))return;
+  const free=T.cols.map((col,i)=>col.length&&!busy.has(i)&&!col[col.length-1].off?i:-1).filter(i=>i>=0);if(!free.length)return;
+  const chief=T.t>10&&Math.random()<.14;T.gobs.push({c:pick(free),t0:T.t,life:SG_CFG.goblinLife*(1-.3*prog)*(chief?1.2:1),chief,hp:chief?2:1})}
+function sgBonk(gb,o,p){const T=SG;
+  if(gb.hp>1){gb.hp--;gb.life+=.6;sgAdd(5,p.x,p.y-T.gr,'Ouch! +5');tone(500,.1,'square',.05);return}
+  T.gobs.splice(T.gobs.indexOf(gb),1);o.hits++;T.bonks++;
+  T.fx.push({x:p.x,y:p.y,vx:(o.vx>0?1:-1)*T.bs*5,vy:-T.bs*9,life:1,e:gb.chief?'👹':'👺',sz:T.gr*1.6,spin:1,rot:0});
+  sgAdd(gb.chief?25:10,p.x,p.y-T.gr,gb.chief?'Goblin chief! +25':'Bonk! +10');
+  if(o.hits>1)setTimeout(()=>{if(SG)sgAdd(10*(o.hits-1),T.W/2,T.H*.3,o.hits===2?'Double bonk! ✨':'Mega bonk! 💥','#ffe58a')},150);
+  tone(880,.07,'square',.05);tone(1320,.12,'triangle',.06,.06)}
+function sgDragonHit(o){const T=SG,d=T.drag;d.hit=true;
+  T.fx.push({x:d.x,y:d.y,vx:-T.bs*2,vy:-T.bs*6,life:1.4,e:'🐉',sz:T.gr*2.6,spin:1,rot:0});
+  sgBits(d.x,d.y,'#ffd23d',14,'🪙');sgAdd(40,d.x,d.y,'Dragon down! +40');sfx.chest();T.drag=null;T.dragNext=T.t+rnd(12,16)}
+function sgHitBlock(o,c,j){const T=SG,col=T.cols[c],bk=col[j],x=T.x0+(c+.5)*T.bs,y=T.ground-(j+.5)*T.bs;o.dead=true;
+  sgBits(o.x,o.y,'#8a8f9c',6);tone(110,.16,'sawtooth',.06,0,60);
+  if(--bk.hp>0)return;
+  col.splice(j,1);for(let k=j;k<col.length;k++)col[k].off+=T.bs;
+  sgBits(x,y,'#a7aec0',10);sgAdd(2,x,y);
+  if(!T.rebuild&&T.cols.reduce((a,c)=>a+c.length,0)<=T.total*.35){T.rebuild=1.4;T.castles++;
+    sgAdd(30,T.W*.72,T.H*.35,'Castle crumbled! +30','#ffe58a');sfx.fanfare();
+    T.gobs.forEach(g=>{const p=sgGobPos(g);T.fx.push({x:p.x,y:p.y,vx:0,vy:-T.bs*4,life:.8,e:'👺',sz:T.gr*1.6,spin:1,rot:0})});T.gobs=[]}}
+function sgStepBall(o,dt){const T=SG;o.vy+=T.g*dt;o.vx+=T.wind*dt;o.x+=o.vx*dt;o.y+=o.vy*dt;
+  for(const gb of T.gobs.slice()){const p=sgGobPos(gb);if(p.k>.45&&Math.hypot(o.x-p.x,o.y-p.y)<T.br+T.gr*.8)sgBonk(gb,o,p)}
+  if(T.drag&&Math.hypot(o.x-T.drag.x,o.y-T.drag.y)<T.br+T.gr*1.3)sgDragonHit(o);
+  const lx=o.x+Math.sign(o.vx)*T.br*.6,c=Math.floor((lx-T.x0)/T.bs),col=T.cols[c];
+  if(col){const j=Math.floor((T.ground-(o.y+T.br*.6))/T.bs);if(j>=0&&j<col.length&&col[j].off<T.bs*.5)return sgHitBlock(o,c,j)}
+  if(o.y>T.ground-T.br){o.dead=true;sgBits(o.x,T.ground,'#a0805a',6);tone(90,.12,'triangle',.07)}
+  else if(o.x>T.W+80||o.x<-80)o.dead=true}
+function sgLoop(now){const T=SG;if(!T||!T.run)return;if(T.paused){T.last=now;return requestAnimationFrame(sgLoop)}
+  const dt=Math.max(0,Math.min(.05,(now-T.last)/1000));T.last=now;T.t+=dt;sgSize();
+  const prog=Math.min(1,T.t/T.dur);
+  T.reload=Math.max(0,T.reload-dt);T.swing=Math.max(0,T.swing-dt);
+  if(T.t>=T.windNext)sgWindSet();
+  if(T.rebuild){T.rebuild-=dt;if(T.rebuild<=0){T.rebuild=0;sgCastle(true)}}
+  else{T.gobT-=dt;if(T.gobT<=0){sgSpawnGob();T.gobT=Math.max(.55,1.1-.5*prog)*(.8+Math.random()*.4)}}
+  if(!T.drag&&T.t>=T.dragNext&&T.dur-T.t>4)T.drag={x:T.W+T.gr*2,y0:T.H*(.12+Math.random()*.12),t0:T.t};
+  if(T.drag){const d=T.drag;d.x-=T.W*.2*dt;d.y=d.y0+Math.sin((T.t-d.t0)*3)*T.H*.04;if(d.x<-T.gr*3){T.drag=null;T.dragNext=T.t+rnd(8,12)}}
+  for(const col of T.cols)for(const bk of col)if(bk.off>0){bk.v+=T.g*dt;bk.off=Math.max(0,bk.off-bk.v*dt);if(!bk.off)bk.v=0}
+  for(let i=T.gobs.length-1;i>=0;i--){const g=T.gobs[i];
+    if(!T.cols[g.c].length){const x=T.x0+(g.c+.5)*T.bs;T.gobs.splice(i,1);T.fx.push({x,y:T.ground-T.gr,vx:0,vy:-T.bs*5,life:.9,e:'👺',sz:T.gr*1.6,spin:1,rot:0});sgAdd(10,x,T.ground-T.gr*2,'Toppled! +10');continue}
+    if(T.t-g.t0>g.life)T.gobs.splice(i,1)}
+  for(const o of T.balls){const steps=Math.max(1,Math.ceil(Math.hypot(o.vx,o.vy)*dt/T.br));for(let s=0;s<steps&&!o.dead;s++)sgStepBall(o,dt/steps)}
+  T.balls=T.balls.filter(o=>!o.dead);
+  for(let i=T.fx.length-1;i>=0;i--){const f=T.fx[i];f.life-=dt;if(f.life<=0){T.fx.splice(i,1);continue}f.vy+=T.g*.8*dt;f.x+=f.vx*dt;f.y+=f.vy*dt;if(f.spin)f.rot+=8*dt}
+  for(let i=T.texts.length-1;i>=0;i--){const x=T.texts[i];x.life-=dt;x.y-=26*dt;if(x.life<=0)T.texts.splice(i,1)}
+  sgDraw();
+  const left=Math.max(0,T.dur-T.t),tl=$('#sgTime');if(tl)tl.style.width=(left/T.dur*100)+'%';
+  if(left<=0)return sgEnd('time');
+  requestAnimationFrame(sgLoop)}
+function sgEmoji(c,e,x,y,size){c.font=`${Math.round(size)}px "Apple Color Emoji","Segoe UI Emoji","Noto Color Emoji",sans-serif`;c.textAlign='center';c.textBaseline='middle';c.fillText(e,x,y)}
+function sgDraw(){const T=SG,c=T.ctx,bs=T.bs;c.clearRect(0,0,T.W,T.H);
+  // ground
+  c.fillStyle='#6cc04a';c.fillRect(0,T.ground,T.W,T.H-T.ground);c.fillStyle='#4f9a35';c.fillRect(0,T.ground,T.W,Math.max(4,bs*.15));
+  // castle
+  const stone=['#a9b0c0','#9ea6b8','#b3b9c7','#959db0'];
+  T.cols.forEach((col,i)=>{const x=T.x0+i*bs;col.forEach((bk,j)=>{const y=T.ground-(j+1)*bs-bk.off;
+    c.fillStyle=stone[bk.s];c.fillRect(x,y,bs,bs);c.strokeStyle='#5c6478';c.lineWidth=Math.max(1.5,bs*.06);c.strokeRect(x+.5,y+.5,bs-1,bs-1);
+    c.beginPath();c.moveTo(x,y+bs/2);c.lineTo(x+bs,y+bs/2);c.moveTo(x+bs*(j%2?.3:.7),y);c.lineTo(x+bs*(j%2?.3:.7),y+bs/2);c.lineWidth=1;c.stroke();
+    if(bk.hp<2){c.strokeStyle='#3b4152';c.lineWidth=Math.max(1.5,bs*.05);c.beginPath();c.moveTo(x+bs*.2,y+bs*.15);c.lineTo(x+bs*.45,y+bs*.45);c.lineTo(x+bs*.35,y+bs*.7);c.lineTo(x+bs*.6,y+bs*.9);c.stroke()}
+    if(i===Math.floor(T.cols.length/2)&&j===0&&!bk.off){c.fillStyle='#4a3420';c.beginPath();c.moveTo(x+bs*.2,y+bs);c.lineTo(x+bs*.2,y+bs*.45);c.arc(x+bs/2,y+bs*.45,bs*.3,Math.PI,0);c.lineTo(x+bs*.8,y+bs);c.fill()}});
+    if(col.length&&(i===0||i===T.cols.length-1)&&!col[col.length-1].off){const y=T.ground-col.length*bs;c.strokeStyle='#5a3d22';c.lineWidth=2;c.beginPath();c.moveTo(x+bs/2,y);c.lineTo(x+bs/2,y-bs*1.1);c.stroke();
+      c.fillStyle='#d0383a';c.beginPath();const w=T.windLvl>=0?1:-1;c.moveTo(x+bs/2,y-bs*1.1);c.lineTo(x+bs/2+w*bs*(.4+.15*Math.abs(T.windLvl)),y-bs*.95);c.lineTo(x+bs/2,y-bs*.8);c.fill()}});
+  // goblins rise from behind the battlements
+  for(const g of T.gobs){const p=sgGobPos(g),top=sgColTop(g.c);c.save();c.beginPath();c.rect(0,0,T.W,top);c.clip();
+    sgEmoji(c,g.chief?'👹':'👺',p.x,p.y,T.gr*1.7);if(g.chief)sgEmoji(c,'👑',p.x,p.y-T.gr*.95,T.gr*.8);c.restore()}
+  if(T.drag)sgEmoji(c,'🐉',T.drag.x,T.drag.y,T.gr*2.6);
+  // catapult
+  const P=T.piv,A=T.arm,aimK=T.aim?(sgVel(T.aim)||{k:0}).k:0,a=T.swing>0?.5:-.9-.35*aimK;
+  c.lineCap='round';c.strokeStyle='#7a4f27';c.lineWidth=Math.max(5,A*.12);
+  c.beginPath();c.moveTo(P.x-A*.45,T.ground-A*.12);c.lineTo(P.x+A*.45,T.ground-A*.12);c.moveTo(P.x-A*.3,T.ground-A*.12);c.lineTo(P.x,P.y);c.lineTo(P.x+A*.3,T.ground-A*.12);c.stroke();
+  const tip={x:P.x+A*Math.sin(a),y:P.y-A*Math.cos(a)},tail={x:P.x-A*.3*Math.sin(a),y:P.y+A*.3*Math.cos(a)};
+  c.strokeStyle='#9a6534';c.lineWidth=Math.max(4,A*.09);c.beginPath();c.moveTo(tail.x,tail.y);c.lineTo(tip.x,tip.y);c.stroke();
+  c.fillStyle='#5a3d22';[-1,1].forEach(s=>{c.beginPath();c.arc(P.x+s*A*.38,T.ground-A*.12,A*.12,0,7);c.fill()});
+  c.fillStyle='#7a4f27';c.beginPath();c.arc(tip.x,tip.y,T.br*1.25,0,7);c.fill();
+  if(T.reload<=0&&T.swing<=0){c.fillStyle='#7d8496';c.beginPath();c.arc(tip.x,tip.y-T.br*.4,T.br,0,7);c.fill()}
+  // aim preview: the first part of the flight, wind included
+  if(T.aim){const v=sgVel(T.aim);if(v){let x=T.L.x,y=T.L.y,vx=v.vx,vy=v.vy;const st=.05;
+    for(let i=1;i<=16;i++){vy+=T.g*st;vx+=T.wind*st;x+=vx*st;y+=vy*st;if(y>T.ground)break;c.fillStyle=`rgba(255,255,255,${1-i/18})`;c.beginPath();c.arc(x,y,Math.max(2.5,T.br*.35),0,7);c.fill()}}}
+  for(const o of T.balls){c.fillStyle='#7d8496';c.strokeStyle='#4b5160';c.lineWidth=2;c.beginPath();c.arc(o.x,o.y,T.br,0,7);c.fill();c.stroke()}
+  for(const f of T.fx){c.globalAlpha=Math.min(1,f.life*2);
+    if(f.e){c.save();c.translate(f.x,f.y);if(f.spin)c.rotate(f.rot);sgEmoji(c,f.e,0,0,f.sz);c.restore()}
+    else{c.fillStyle=f.col;c.fillRect(f.x-f.sz/2,f.y-f.sz/2,f.sz,f.sz)}c.globalAlpha=1}
+  for(const x of T.texts){c.globalAlpha=Math.min(1,x.life/x.max*2);c.font=`800 ${Math.round(x.size)}px 'Baloo 2',system-ui,sans-serif`;c.textAlign='center';c.textBaseline='middle';c.lineWidth=5;c.strokeStyle='rgba(20,28,48,.85)';c.strokeText(x.txt,x.x,x.y);c.fillStyle=x.col;c.fillText(x.txt,x.x,x.y);c.globalAlpha=1}}
+function sgEnd(why){const T=SG;if(!T||!T.run)return;T.run=false;T.balls=[];T.aim=null;sgDraw();
+  const b=bonusState(),pb=T.score>b.best;if(pb)b.best=T.score;const y=Math.min(15,Math.floor(T.score/15));S.yarn+=y;save();
+  sfx.finish();if(pb&&T.score>0)confetti(70);
+  $('#sgMsg').innerHTML=`<div class="tb-card"><h2>${why==='quit'?'Siege over':"Time's up!"}</h2><div id="sgEndCat">${catHTML(cs(120),'happy')}</div><div class="tb-final">${T.score}</div><p>${pb&&T.score>0?'<b>New best score!</b> 🎉':`Best: <b>${b.best}</b>`}</p><p class="tiny">${T.bonks} goblin${T.bonks===1?'':'s'} bonked · ${T.castles} castle${T.castles===1?'':'s'} crumbled${y?` · +${y} 🪙`:''}</p>
+   <div class="row" style="margin-top:8px">${b.passes>0?`<button class="btn sun" data-act="sgAgain">Play again (🎟️ ${b.passes})</button>`:''}<button class="btn ghost" data-act="sgDone">Done</button></div>${b.passes>0?'':'<p class="tiny" style="margin-top:6px">Beat another guardian to earn another siege!</p>'}</div>`;
+  setTimeout(()=>{const c=$('#sgEndCat .cat');if(c){const w=winMove();if(w)doMove(c,w);else celebrate(c)}},700);
+  if(readAloud())setTimeout(()=>speak(`You scored ${T.score}!`),900)}
+function sgClose(){if(SG)SG.run=false;SG=null;const d=$('#siege');if(d)d.remove();render()}
+document.addEventListener('visibilitychange',()=>{if(SG&&SG.run&&document.hidden){SG.paused=true;SG.aim=null;$('#sgMsg').innerHTML=`<div class="tb-card"><h2>Paused ⏸️</h2><button class="btn big" data-act="sgResume">Keep going ▶</button></div>`}});
+
+/* ---------------- Training game: Halving Blade ----------------
+   Always open in Training, because every cut is a halving sum. Numbers fall; a swipe cuts one into two halves
+   that hop apart and keep falling, so each half can be cut again: 8 → 4 + 4, 7 → 3.5 + 3.5, 3.5 → 1.75 + 1.75.
+   A piece stops splitting after 4 cuts, or when halving it would need more than 3 decimal places, and shatters
+   into gold instead. Blacksmith orders ask for one exact half (6.25, say), so the player has to spot which
+   falling number halves down to it. */
 const HB={dur:60,maxCuts:4,maxOnScreen:42,colors:['#3b6fd8','#2f9e68','#e09b12','#d0583a','#7a4fd0']};
 const halfOk=v=>Math.round(v*1000)%2===0; // halving keeps it to 3 decimal places
 let TB=null;
-function startBonus(){
-  const b=bonusState(),n=bonusNeed();closeModal();
-  if(b.passes<1)return modal(`<h2>⚔️ Halving Blade</h2><div style="font-size:40px;font-weight:800">7 → 3.5 + 3.5</div><p>A bonus game you <b>earn by learning</b>.</p><p class="tiny">Spend ${n.secs/60} minutes learning and get ${n.right} answers right (a long break starts the count again). You can earn ${BONUS.perDay} a day.</p><button class="btn" data-act="close">OK</button>`);
-  b.passes--;b.plays++;save();
+function startBlade(){
+  const b=bonusState();closeModal();b.hbPlays++;save();
   const d=document.createElement('div');d.id='blade';
   d.innerHTML=`<div class="hb-sky">${['8%:6%','20%:30%','6%:58%','14%:82%','30%:14%','26%:70%'].map((v,i)=>{const [t,l]=v.split(':');return `<i class="sc-star" style="top:${t};left:${l};animation-delay:${i*.4}s"></i>`}).join('')}<span class="hb-moon">🌕</span><span class="hb-castle">🏰</span></div>
    <div class="tb-hud"><div class="pill">⭐ <b id="hbScore">0</b></div><div class="pill" id="hbLives">❤️❤️❤️</div><div class="pill tb-mult" id="hbPow"></div><button class="xbtn" data-act="tbQuit" aria-label="Stop the game">✕</button></div>
@@ -2762,10 +2912,10 @@ function hbDraw(){const T=TB,c=T.ctx;c.clearRect(0,0,T.W,T.H);
     for(let i=1;i<T.trail.length;i++){const a=T.trail[i-1],b=T.trail[i],k=1-(T.t-b.t)/.16;c.strokeStyle=fire?`rgba(255,190,90,${k})`:`rgba(255,255,255,${k})`;c.lineWidth=2+k*9;c.beginPath();c.moveTo(a.x,a.y);c.lineTo(b.x,b.y);c.stroke()}c.shadowBlur=0}
   for(const x of T.texts){c.globalAlpha=Math.min(1,x.life/x.max*2);c.font=`800 ${Math.round(x.size)}px 'Baloo 2',system-ui,sans-serif`;c.textAlign='center';c.textBaseline='middle';c.lineWidth=5;c.strokeStyle='rgba(20,28,48,.85)';c.strokeText(x.txt,x.x,x.y);c.fillStyle=x.col;c.fillText(x.txt,x.x,x.y);c.globalAlpha=1}}
 function tbEnd(why){const T=TB;if(!T||!T.run)return;T.run=false;T.pieces=[];hbDraw();
-  const b=bonusState(),pb=T.score>b.best;if(pb)b.best=T.score;const y=Math.min(10,Math.floor(T.score/12));S.yarn+=y;save();
+  const b=bonusState(),pb=T.score>b.hbBest;if(pb)b.hbBest=T.score;const y=Math.min(10,Math.floor(T.score/12));S.yarn+=y;save();
   sfx.finish();if(pb&&T.score>0)confetti(70);const o=$('#hbOrder');if(o){o.innerHTML='';o.classList.remove('on')}
-  $('#tbMsg').innerHTML=`<div class="tb-card"><h2>${why==='lives'?'Too many skulls!':why==='quit'?'Game over':"Time's up!"}</h2><div id="tbEndCat">${catHTML(cs(120),'happy')}</div><div class="tb-final">${T.score}</div><p>${pb&&T.score>0?'<b>New best score!</b> 🎉':`Best: <b>${b.best}</b>`}</p><p class="tiny">${T.cuts} slices · ${T.orders} order${T.orders===1?'':'s'} forged${y?` · +${y} 🪙`:''}</p>
-   <div class="row" style="margin-top:8px">${b.passes>0?`<button class="btn sun" data-act="tbAgain">Play again (🎟️ ${b.passes})</button>`:''}<button class="btn ghost" data-act="tbDone">Done</button></div>${b.passes>0?'':'<p class="tiny" style="margin-top:6px">Keep learning to earn another bonus game!</p>'}</div>`;
+  $('#tbMsg').innerHTML=`<div class="tb-card"><h2>${why==='lives'?'Too many skulls!':why==='quit'?'Game over':"Time's up!"}</h2><div id="tbEndCat">${catHTML(cs(120),'happy')}</div><div class="tb-final">${T.score}</div><p>${pb&&T.score>0?'<b>New best score!</b> 🎉':`Best: <b>${b.hbBest}</b>`}</p><p class="tiny">${T.cuts} slices · ${T.orders} order${T.orders===1?'':'s'} forged${y?` · +${y} 🪙`:''}</p>
+   <div class="row" style="margin-top:8px"><button class="btn sun" data-act="tbAgain">Play again ↻</button><button class="btn ghost" data-act="tbDone">Done</button></div></div>`;
   setTimeout(()=>{const c=$('#tbEndCat .cat');if(c){const w=winMove();if(w)doMove(c,w);else celebrate(c)}},700);
   if(readAloud())setTimeout(()=>speak(`You scored ${T.score}!`),900)}
 function tbClose(){if(TB)TB.run=false;TB=null;const d=$('#blade');if(d)d.remove();render()}
@@ -2969,8 +3119,14 @@ const ACT={
   tbGo:()=>tbGo(),
   tbQuit:()=>{if(TB&&TB.run)tbEnd('quit');else tbClose()},
   tbDone:()=>tbClose(),
-  tbAgain:()=>{tbClose();startBonus()},
+  tbAgain:()=>{tbClose();startBlade()},
+  blade:()=>{sfx.tap();startBlade()},
   tbResume:()=>{if(TB){$('#tbMsg').innerHTML='';TB.paused=false}},
+  sgGo:()=>sgGo(),
+  sgQuit:()=>{if(SG&&SG.run)sgEnd('quit');else sgClose()},
+  sgDone:()=>sgClose(),
+  sgAgain:()=>{sgClose();startBonus()},
+  sgResume:()=>{if(SG){$('#sgMsg').innerHTML='';SG.paused=false}},
   switchPlayer:()=>{sfx.tap();if(!S.cloud)return modal(`<h2>Switch player?</h2><p>This game is only saved on this device, so switching would erase it. Ask a grown-up to tap ⚙️ and choose <b>Save to cloud</b> first.</p><button class="btn" data-act="close">OK</button>`);
     modal(`<h2>Switch player? 👋</h2>${catHTML(cs(100),'sleepy')}<p>Your progress is saved. To come back, type <b>${esc(S.name)}</b> and your secret code.</p><div class="row" style="margin-top:10px"><button class="btn ghost" data-act="close">Stay</button><button class="btn" data-act="switchYes">Switch player</button></div>`)},
   switchYes:async()=>{clearTimeout(cloudTimer);for(let i=0;i<20&&cloudBusy;i++)await new Promise(r=>setTimeout(r,250));await cloudPush();if(cloudState==='off'){closeModal();return toast('<span class="ti">☁️</span><div>No internet right now. Try again soon so your progress is safe!</div>')}try{speechSynthesis.cancel()}catch(e){}localStorage.removeItem(SAVE_KEY);location.reload()}
@@ -2987,7 +3143,7 @@ document.addEventListener('keydown',e=>{
   else if(e.key==='Backspace'){e.preventDefault();press('del')}
   else if(e.key==='Enter'){e.preventDefault();if(P.explaining)ACT.gotit();else press('ok')}
 });
-setInterval(()=>{if(!document.hidden&&S.name){S.stats.seconds+=10;bonusTick();persistLocal()}},10000);
+setInterval(()=>{if(!document.hidden&&S.name){S.stats.seconds+=10;persistLocal()}},10000);
 
 /* ---------------- go! ---------------- */
 /* audio needs a tap before it can start (iPhone/iPad rule) */
