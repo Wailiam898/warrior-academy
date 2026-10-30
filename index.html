@@ -600,6 +600,48 @@ button.me{cursor:pointer}
   .play-right{position:sticky;top:16px}
 }
 
+/* Halving Slice */
+#blade{position:fixed;inset:0;z-index:60;background:linear-gradient(180deg,#18294a 0%,#325190 55%,#627cb0 100%);touch-action:none;user-select:none;-webkit-user-select:none;overflow:hidden;display:flex;flex-direction:column}
+.hb-sky{position:absolute;inset:0;pointer-events:none}
+.hb-moon{position:absolute;right:8%;top:12%;font-size:64px;opacity:.9}
+.hb-home{position:absolute;left:50%;bottom:-6px;transform:translateX(-50%);font-size:min(46vw,300px);line-height:1;opacity:.22;filter:grayscale(.4)}
+.hb-field{position:relative;flex:1;overflow:hidden}
+.hb-field canvas{position:absolute;inset:0;display:block;touch-action:none}
+.hb-order{position:absolute;z-index:3;top:66px;left:12px;right:12px;pointer-events:none;text-align:center;color:#fff;font-weight:700;font-size:18px;opacity:0;transition:opacity .3s}
+.hb-order.on{opacity:1;background:rgba(255,243,196,.95);color:#4a3200;border-radius:16px;padding:6px 10px;box-shadow:0 4px 0 rgba(0,0,0,.2)}
+.hb-order b{font-size:26px;color:#a35f00}
+.hb-hint{display:block;font-size:15px;color:#6b5000}
+.hb-demo{font-size:22px;line-height:1.5;margin:8px 0;background:#f0f5ff;border-radius:14px;padding:6px}
+.hb-demo b{display:inline-block;min-width:1.6em;background:#5583e0;color:#fff;border-radius:99px;padding:0 8px}
+.hb-demo b:nth-of-type(n+2){background:#2f9e68}
+.pcard .hofbtn{flex:none}
+@media (min-width:700px){.hb-order{font-size:22px}.hb-order b{font-size:32px}}
+/* Hall of Fame: old-school arcade high-score table */
+.modal.hofm{background:#120d2e;color:#fff;border:4px solid #ffc43d;box-shadow:0 0 0 4px #120d2e,0 0 30px #6f9fff,0 20px 60px rgba(0,0,0,.5)}
+.hof{font-family:"Courier New",ui-monospace,monospace;font-weight:900;text-transform:uppercase}
+.hof-title{font-size:26px;color:#ffd84a;text-shadow:0 0 8px #ff9a3d,3px 3px 0 #4a7ad9;letter-spacing:2px}
+.hof-sub{font-size:13px;color:#7fe8ff;letter-spacing:3px;margin:2px 0 8px}
+.hof-tabs{display:flex;gap:6px;justify-content:center;margin-bottom:8px}
+.hof-tabs button{font:inherit;font-size:14px;color:#8fa2c7;background:#221a4d;border-radius:10px;padding:6px 12px}
+.hof-tabs button.on{color:#120d2e;background:#7fe8ff}
+.hof-list{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:4px}
+.hof-row{display:grid;grid-template-columns:3.2em auto 1fr auto;align-items:center;gap:8px;background:#1d1645;border-radius:12px;padding:3px 10px;text-align:left}
+.hof-row.p1{background:linear-gradient(90deg,#4a3a00,#1d1645)}.hof-row.p2{background:linear-gradient(90deg,#3b3f4f,#1d1645)}.hof-row.p3{background:linear-gradient(90deg,#4a2a14,#1d1645)}
+.hof-row.me{outline:3px solid #6f9fff;animation:hofMe 1.2s steps(2) infinite}
+@keyframes hofMe{50%{outline-color:#ffd84a}}
+.hof-pos{font-size:18px;color:#ffd84a;text-align:center}
+.hof-who{display:flex;flex-direction:column;line-height:1.1;min-width:0}
+.hof-who b{font-size:18px;color:#fff;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.hof-who small{font-size:10px;color:#7fe8ff;letter-spacing:1px;font-weight:700}
+.hof-score{font-size:20px;color:#7dff8a;text-shadow:0 0 6px #2bd14a;letter-spacing:1px}
+.hof-me{margin-top:10px;color:#ffd84a;font-size:15px}.hof-me small{color:#8fa2c7;font-size:11px}
+.hof-empty{padding:26px 0;color:#7fe8ff;font-size:18px}.hof-empty small{color:#8fa2c7;font-size:12px}
+.blink{animation:hofBlink 1s steps(2) infinite}
+@keyframes hofBlink{50%{opacity:.25}}
+.hof-close{margin-top:12px;font-family:inherit}
+.hofbtn{font-size:22px;padding:6px 10px;margin-left:4px}
+.tb-rank{color:#3f70d1;font-weight:800;min-height:1.2em;margin:2px 0}
+
 /* accessories inside the knight drawing */
 .cat .acc2{font-family:"Apple Color Emoji","Segoe UI Emoji","Noto Color Emoji",sans-serif;pointer-events:none}
 .wintag{position:absolute;top:-9px;left:50%;transform:translateX(-50%);background:var(--sun,#ffc43d);color:#2a364f;font-size:11px;font-weight:800;border-radius:99px;padding:1px 8px;white-space:nowrap}
@@ -728,21 +770,9 @@ button.me{cursor:pointer}
 .sw .gthumb{width:56px;height:56px}
 .sw{gap:0}
 @media (min-width:700px){.gthumb{width:96px;height:96px}.sw .gthumb{width:70px;height:70px}}
-/* Halving Blade */
-#blade{position:fixed;inset:0;z-index:60;background:linear-gradient(180deg,#141b3d 0%,#2c3a7a 55%,#6b4f9e 100%);touch-action:none;user-select:none;-webkit-user-select:none;overflow:hidden;display:flex;flex-direction:column}
-.hb-sky{position:absolute;inset:0;pointer-events:none}
-.hb-moon{position:absolute;right:8%;top:12%;font-size:64px;opacity:.9}
-.hb-castle{position:absolute;left:50%;bottom:-6px;transform:translateX(-50%);font-size:min(46vw,300px);line-height:1;opacity:.22;filter:grayscale(.4)}
-.hb-field{position:relative;flex:1;overflow:hidden}
-.hb-field canvas{position:absolute;inset:0;display:block;touch-action:none}
-.hb-order{position:absolute;z-index:3;top:66px;left:12px;right:12px;pointer-events:none;text-align:center;color:#fff;font-weight:700;font-size:18px;opacity:0;transition:opacity .3s}
-.hb-order.on{opacity:1;background:rgba(255,243,196,.95);color:#4a3200;border-radius:16px;padding:6px 10px;box-shadow:0 4px 0 rgba(0,0,0,.2)}
-.hb-order b{font-size:26px;color:#a35f00}
-.hb-hint{display:block;font-size:15px;color:#6b5000}
-.hb-demo{font-size:22px;line-height:1.5;margin:8px 0;background:#eef4ff;border-radius:14px;padding:6px}
-.hb-demo b{display:inline-block;min-width:1.6em;background:#3b6fd8;color:#fff;border-radius:99px;padding:0 8px}
-.hb-demo b:nth-of-type(n+2){background:#2f9e68}
-@media (min-width:700px){.hb-order{font-size:22px}.hb-order b{font-size:32px}}
+/* Halving Blade: Whisker's Halving Slice styles, night-castle sky */
+#blade{background:linear-gradient(180deg,#141b3d 0%,#2c3a7a 55%,#6b4f9e 100%)}
+.hb-demo{background:#eef4ff}
 /* Catapult Siege */
 #siege{position:fixed;inset:0;z-index:60;background:linear-gradient(180deg,#5fb4f2 0%,#a9dcff 60%,#e3f5ff 100%);touch-action:none;user-select:none;-webkit-user-select:none;overflow:hidden;display:flex;flex-direction:column}
 .sg-sky{position:absolute;inset:0;pointer-events:none}
@@ -2113,7 +2143,7 @@ function practiceView(){
   const quick=(k,i,t,p)=>`<div class="pcard"><div class="pi">${i}</div><div class="grow"><h3>${t}</h3><p>${p}</p></div><button class="btn" data-act="quick" data-k="${k}">Play</button></div>`;
   const ddojo=`<div class="pcard col"><div class="row" style="justify-content:flex-start"><div class="pi">➗</div><div class="grow"><h3>Division Arena</h3><p>Train sharing facts. Each one is a times-table fact turned around!</p></div></div>
   <div class="tables">${range(2,12).map(t=>{const k=divStrong(t);return `<button class="tbtn" data-act="dtable" data-t="${t}">÷${t}<small>${k}/12 strong</small><span class="minibar"><i style="width:${k/12*100}%"></i></span></button>`}).join('')}</div></div>`;
-  const blade=`<div class="pcard"><div class="pi">⚔️</div><div class="grow"><h3>Halving Blade</h3><p>Slice falling numbers in half: 7 → 3.5 + 3.5. Your best: <b>${bonusState().hbBest}</b></p></div><button class="btn sun" data-act="blade">Play</button></div>`;
+  const blade=`<div class="pcard"><div class="pi">⚔️</div><div class="grow"><h3>Halving Blade</h3><p>Slice falling numbers in half: 7 → 3.5 + 3.5. Your best: <b>${bonusState().hbBest}</b></p></div><button class="chip hofbtn" data-act="hof" data-g="blade" aria-label="Hall of Fame">🏆</button><button class="btn sun" data-act="blade">Play</button></div>`;
   return '<h2 class="sec">Training</h2>'+blade+dojo+ddojo+quick('dec','🥧','Decimals','Tenths, hundredths, money and comparing.')+quick('mixed4','🎪','All four mixed','+ − × ÷ and two-step stories.')+garden+light;
 }
 
@@ -2264,6 +2294,8 @@ function parentsView(){
    <div class="row" style="justify-content:flex-start;margin-top:8px"><b>Age</b><span>${S.age?(S.age>=14?'14+':S.age):'not set'}</span><button class="chip" data-act="ageChange">Change age</button></div>
    <p class="tiny" style="margin:2px 0 0">${BAND_LABEL[band()]}</p>
    <div class="row" style="justify-content:flex-start;margin-top:8px"><b>Secret code</b><span>🔐 ${S.pinHash?'set':'not set'}</span><button class="chip" data-act="pinChange">Change code</button></div>
+   <div class="row" style="justify-content:flex-start;margin-top:8px"><b>Hall of Fame</b><button class="chip ${!S.settings.hideBoard?'on':''}" data-act="hofHide" data-v="0">Show ${esc(firstName(S.name))}</button><button class="chip ${S.settings.hideBoard?'on':''}" data-act="hofHide" data-v="1">Hide</button><button class="chip" data-act="hof">🏆 View</button></div>
+   <p class="tiny" style="margin:2px 0 0">The Hall of Fame boards (${Object.values(HOF_GAMES).map(g=>g.title).join(' and ')}) are seen by everyone who plays Warrior Academy. It only ever shows a <b>first name</b> (“${esc(firstName(S.name))}”), the knight picture, the warrior rank and the score. Hide takes ${esc(firstName(S.name))} off the board straight away and stops new scores being posted. ${S.cloud?'':'Only cloud-saved players appear on the boards.'}</p>
    <div class="row" style="justify-content:flex-start;margin-top:8px"><b>Cloud save</b><span>${S.cloud?`☁️ saved as <b>${esc(S.name)}</b>`:'📱 this device only'}</span>${S.cloud?'':'<button class="chip" data-act="cloudJoin">Save to cloud</button>'}</div>
    <div class="row" style="justify-content:flex-start;margin-top:8px"><b>This device</b><button class="chip" data-act="signOut">Sign out</button><button class="chip" data-act="reset">Start over…</button></div>
    <p class="tiny" style="margin-top:6px">To play on another device, open the game there and type the same name <b>${esc(S.name)}</b>. They'll also need the 4-number secret code. Sign out keeps the cloud save; Start over erases it on this device and in the cloud.</p></div>
@@ -2645,7 +2677,8 @@ function closeScratch(silent){const s=$('#scratch');if(s)s.remove();if(silent&&P
 function bonusState(){if(!S.bonus||typeof S.bonus!=='object')S.bonus={};const b=S.bonus;for(const k of['passes','best','plays','hbBest','hbPlays'])b[k]=b[k]||0;if(!Array.isArray(b.realms))b.realms=[];return b}
 function bonusRealmDone(id){const b=bonusState();if(b.realms.includes(id))return false;b.realms.push(id);b.passes++;UI.passNew=true;save();return true}
 function nextGuardian(){for(const i of realmList()){const R=REALMS[i];if(!bonusState().realms.includes(R.id))return R}return null}
-function bonusCard(){const b=bonusState();
+function bonusCard(){return bonusCard0().replace(/<\/div><\/div>$/,'</div><button class="chip hofbtn" data-act="hof" data-g="siege" aria-label="Hall of Fame">🏆</button></div>')}
+function bonusCard0(){const b=bonusState();
   if(b.passes>0)return `<div class="bonuscard ready"><div class="bi">🏰</div><div class="grow"><b>Catapult Siege</b><div class="tiny">You won ${b.passes} bonus play${b.passes>1?'s':''} by beating a guardian! 🎟️</div></div><button class="btn sun" data-act="bonus">Play ▶</button></div>`;
   const ri=UI.tab==='map'&&realmList().includes(UI.realm)?UI.realm:pickStartRealm(),R=REALMS[ri],n=R.levels.length,done=R.levels.filter((_,i)=>S.stars[lid(ri,i)]).length;
   if(b.realms.includes(R.id))return `<div class="bonuscard" data-act="bonus" role="button"><div class="bi">✅</div><div class="grow"><b>Bonus game: Catapult Siege</b><div class="tiny">You already won ${R.name}'s siege. Beat another guardian to win the next one!</div></div></div>`;
@@ -2792,9 +2825,10 @@ function sgDraw(){const T=SG,c=T.ctx,bs=T.bs;c.clearRect(0,0,T.W,T.H);
   for(const x of T.texts){c.globalAlpha=Math.min(1,x.life/x.max*2);c.font=`800 ${Math.round(x.size)}px 'Baloo 2',system-ui,sans-serif`;c.textAlign='center';c.textBaseline='middle';c.lineWidth=5;c.strokeStyle='rgba(20,28,48,.85)';c.strokeText(x.txt,x.x,x.y);c.fillStyle=x.col;c.fillText(x.txt,x.x,x.y);c.globalAlpha=1}}
 function sgEnd(why){const T=SG;if(!T||!T.run)return;T.run=false;T.balls=[];T.aim=null;sgDraw();
   const b=bonusState(),pb=T.score>b.best;if(pb)b.best=T.score;const y=Math.min(15,Math.floor(T.score/15));S.yarn+=y;save();
+  if(T.score>0)boardSubmit('siege',T.score).then(r=>{const el=$('#sgRank');if(el)el.innerHTML=boardRankLine(r)});
   sfx.finish();if(pb&&T.score>0)confetti(70);
-  $('#sgMsg').innerHTML=`<div class="tb-card"><h2>${why==='quit'?'Siege over':"Time's up!"}</h2><div id="sgEndCat">${catHTML(cs(120),'happy')}</div><div class="tb-final">${T.score}</div><p>${pb&&T.score>0?'<b>New best score!</b> 🎉':`Best: <b>${b.best}</b>`}</p><p class="tiny">${T.bonks} goblin${T.bonks===1?'':'s'} bonked · ${T.castles} castle${T.castles===1?'':'s'} crumbled${y?` · +${y} 🪙`:''}</p>
-   <div class="row" style="margin-top:8px">${b.passes>0?`<button class="btn sun" data-act="sgAgain">Play again (🎟️ ${b.passes})</button>`:''}<button class="btn ghost" data-act="sgDone">Done</button></div>${b.passes>0?'':'<p class="tiny" style="margin-top:6px">Beat another guardian to earn another siege!</p>'}</div>`;
+  $('#sgMsg').innerHTML=`<div class="tb-card"><h2>${why==='quit'?'Siege over':"Time's up!"}</h2><div id="sgEndCat">${catHTML(cs(120),'happy')}</div><div class="tb-final">${T.score}</div><p>${pb&&T.score>0?'<b>New best score!</b> 🎉':`Best: <b>${b.best}</b>`}</p><p class="tiny">${T.bonks} goblin${T.bonks===1?'':'s'} bonked · ${T.castles} castle${T.castles===1?'':'s'} crumbled${y?` · +${y} 🪙`:''}</p><p id="sgRank" class="tb-rank"></p>
+   <div class="row" style="margin-top:8px">${b.passes>0?`<button class="btn sun" data-act="sgAgain">Play again (🎟️ ${b.passes})</button>`:''}<button class="btn" data-act="hof" data-g="siege">🏆 Hall of Fame</button><button class="btn ghost" data-act="sgDone">Done</button></div>${b.passes>0?'':'<p class="tiny" style="margin-top:6px">Beat another guardian to earn another siege!</p>'}</div>`;
   setTimeout(()=>{const c=$('#sgEndCat .cat');if(c){const w=winMove();if(w)doMove(c,w);else celebrate(c)}},700);
   if(readAloud())setTimeout(()=>speak(`You scored ${T.score}!`),900)}
 function sgClose(){if(SG)SG.run=false;SG=null;const d=$('#siege');if(d)d.remove();render()}
@@ -2803,81 +2837,93 @@ document.addEventListener('visibilitychange',()=>{if(SG&&SG.run&&document.hidden
 /* ---------------- Training game: Halving Blade ----------------
    Always open in Training, because every cut is a halving sum. Numbers fall; a swipe cuts one into two halves
    that hop apart and keep falling, so each half can be cut again: 8 → 4 + 4, 7 → 3.5 + 3.5, 3.5 → 1.75 + 1.75.
-   A piece stops splitting after 4 cuts, or when halving it would need more than 3 decimal places, and shatters
-   into gold instead. Blacksmith orders ask for one exact half (6.25, say), so the player has to spot which
-   falling number halves down to it. */
-const HB={dur:60,maxCuts:4,maxOnScreen:42,colors:['#3b6fd8','#2f9e68','#e09b12','#d0583a','#7a4fd0']};
-const halfOk=v=>Math.round(v*1000)%2===0; // halving keeps it to 3 decimal places
-let TB=null;
+   A piece shatters into a treat instead of splitting once it has been cut too often for the band, or when its
+   half would need more decimal places than the band allows. Orders ask for one exact half (6.25, say), so the
+   player has to spot which falling number halves down to it.
+   Each finger is its own blade: a cut only joins points from the same finger, so holding two fingers down can't
+   draw a line between them, and a jump too long to be a real swipe doesn't cut. */
+const HB_THEME={name:'Halving Blade',bad:'💀',badTxt:'💀 Cursed!',fire:'🔥 Flaming blade! ×2',order:'📜 Blacksmith’s order',made:'Order forged!',madeE:'🔨',moon:'🌕',home:'🏰',badHow:'Don’t slice the cursed skulls',orderHow:'Make the blacksmith’s number for big points'};
+const HB_BAND={little:{max:20,even:true,dp:0,cuts:3,k:2,spawn:1.3},middle:{max:50,dp:1,cuts:3,k:2,spawn:1.15},big:{max:100,dp:3,cuts:4,k:3,spawn:1}};
+const HB={dur:60,maxOnScreen:42,colors:['#5583e0','#2f9e68','#e09b12','#3b8fd8','#4f7ad0']};
+let HS=null;
+const hbHalfOk=v=>Math.round(v*Math.pow(10,HS.cfg.dp))%2===0; // halving stays within the band's decimal places
 function startBlade(){
   const b=bonusState();closeModal();b.hbPlays++;save();
+  const cfg=HB_BAND[band()]||HB_BAND.big,little=cfg.dp===0;
   const d=document.createElement('div');d.id='blade';
-  d.innerHTML=`<div class="hb-sky">${['8%:6%','20%:30%','6%:58%','14%:82%','30%:14%','26%:70%'].map((v,i)=>{const [t,l]=v.split(':');return `<i class="sc-star" style="top:${t};left:${l};animation-delay:${i*.4}s"></i>`}).join('')}<span class="hb-moon">🌕</span><span class="hb-castle">🏰</span></div>
-   <div class="tb-hud"><div class="pill">⭐ <b id="hbScore">0</b></div><div class="pill" id="hbLives">❤️❤️❤️</div><div class="pill tb-mult" id="hbPow"></div><button class="xbtn" data-act="tbQuit" aria-label="Stop the game">✕</button></div>
+  d.innerHTML=`<div class="hb-sky">${['8%:6%','20%:30%','6%:58%','14%:82%','30%:14%','26%:70%'].map((v,i)=>{const [t,l]=v.split(':');return `<i class="sc-star" style="top:${t};left:${l};animation-delay:${i*.4}s"></i>`}).join('')}<span class="hb-moon">${HB_THEME.moon}</span><span class="hb-home">${HB_THEME.home}</span></div>
+   <div class="tb-hud"><div class="pill">⭐ <b id="hbScore">0</b></div><div class="pill" id="hbLives">❤️❤️❤️</div><div class="pill tb-mult" id="hbPow"></div><button class="xbtn" data-act="hbQuit" aria-label="Stop the game">✕</button></div>
    <div class="tb-timer"><i id="hbTime"></i></div>
    <div class="hb-order" id="hbOrder"></div>
    <div class="hb-field" id="hbField"><canvas id="hbCv"></canvas></div>
-   <div class="tb-msg" id="tbMsg"><div class="tb-card"><h2>Halving Blade ⚔️</h2>
-    <div class="hb-demo"><b>8</b> → <b>4</b> + <b>4</b><br><b>7</b> → <b>3.5</b> + <b>3.5</b><br><b>3.5</b> → <b>1.75</b> + <b>1.75</b></div>
-    <div class="tb-how"><div><b>👆</b>Swipe to slice a number in half</div><div><b>🔁</b>Slice the halves again before they fall</div><div><b>📜</b>Make the blacksmith's number for big points</div><div><b>💀</b>Don't slice the cursed skulls</div></div>
-    <button class="btn big" data-act="tbGo">Start ▶</button></div></div>`;
+   <div class="tb-msg" id="hbMsg"><div class="tb-card"><h2>${HB_THEME.name} ⚔️</h2>
+    <div class="hb-demo">${little?'<b>8</b> → <b>4</b> + <b>4</b><br><b>4</b> → <b>2</b> + <b>2</b>':'<b>8</b> → <b>4</b> + <b>4</b><br><b>7</b> → <b>3.5</b> + <b>3.5</b>'+(cfg.dp>1?'<br><b>3.5</b> → <b>1.75</b> + <b>1.75</b>':'')}</div>
+    <div class="tb-how"><div><b>👆</b>Swipe to slice a number in half</div><div><b>🔁</b>Slice the halves again before they fall</div><div><b>${HB_THEME.order.split(' ')[0]}</b>${HB_THEME.orderHow}</div><div><b>${HB_THEME.bad}</b>${HB_THEME.badHow}</div></div>
+    <button class="btn big" data-act="hbGo">Start ▶</button></div></div>`;
   document.body.appendChild(d);
-  const f=d.querySelector('#hbField'),cv=d.querySelector('#hbCv');
-  TB={run:false,field:f,cv,ctx:cv.getContext('2d'),sw:null,trail:[]};
+  const cv=d.querySelector('#hbCv');
+  HS={run:false,cfg,field:d.querySelector('#hbField'),cv,ctx:cv.getContext('2d'),sw:new Map(),trail:[]};
   const pos=e=>{const r=cv.getBoundingClientRect();return{x:e.clientX-r.left,y:e.clientY-r.top}};
-  cv.addEventListener('pointerdown',e=>{if(!TB||!TB.run)return;e.preventDefault();try{cv.setPointerCapture(e.pointerId)}catch(_){}const p=pos(e);TB.sw={last:p,count:0};TB.trail.push({x:p.x,y:p.y,t:TB.t})});
-  cv.addEventListener('pointermove',e=>{if(!TB||!TB.run||!TB.sw)return;const p=pos(e);hbSwipe(TB.sw.last,p);TB.sw.last=p;TB.trail.push({x:p.x,y:p.y,t:TB.t})});
-  const up=()=>{if(!TB||!TB.sw)return;const c=TB.sw.count;TB.sw=null;if(c>=3&&TB.run){const g=c*2;TB.score+=g;hbText(TB.W/2,TB.H*.3,`${c===3?'Triple':c===4?'Quad':'Mega'} slice! +${g}`,'#ffd23d',30);sfx.twinkle();hbHud()}};
+  cv.addEventListener('pointerdown',e=>{if(!HS||!HS.run)return;e.preventDefault();try{cv.setPointerCapture(e.pointerId)}catch(_){}const p=pos(e);HS.sw.set(e.pointerId,{last:p,count:0});HS.trail.push({x:p.x,y:p.y,t:HS.t,id:e.pointerId})});
+  cv.addEventListener('pointermove',e=>{if(!HS||!HS.run)return;const s=HS.sw.get(e.pointerId);if(!s)return;const p=pos(e);
+    if(Math.hypot(p.x-s.last.x,p.y-s.last.y)<Math.min(HS.W,HS.H)*.45)hbSwipe(s,p); // a longer jump isn't a real swipe
+    s.last=p;HS.trail.push({x:p.x,y:p.y,t:HS.t,id:e.pointerId})});
+  const up=e=>{if(!HS)return;const s=HS.sw.get(e.pointerId);if(!s)return;HS.sw.delete(e.pointerId);const c=s.count;
+    if(c>=3&&HS.run){const g=c*2;HS.score+=g;hbText(HS.W/2,HS.H*.3,`${c===3?'Triple':c===4?'Quad':'Mega'} slice! +${g}`,'#ffd23d',30);sfx.twinkle();hbHud()}};
   cv.addEventListener('pointerup',up);cv.addEventListener('pointercancel',up);
-  if(readAloud())speak('Halving Blade! Swipe to slice the numbers in half. Do not slice the skulls!');
+  if(readAloud())speak(`${HB_THEME.name}! Swipe to slice the numbers in half.`);
 }
-function hbSize(){const T=TB,W=T.field.clientWidth,H=T.field.clientHeight;if(W===T.W&&H===T.H)return;
+function hbSize(){const T=HS,W=T.field.clientWidth,H=T.field.clientHeight;if(W===T.W&&H===T.H)return;
   const dpr=Math.min(2,window.devicePixelRatio||1);T.W=W;T.H=H;T.cv.width=Math.round(W*dpr);T.cv.height=Math.round(H*dpr);T.cv.style.width=W+'px';T.cv.style.height=H+'px';T.ctx.setTransform(dpr,0,0,dpr,0,0);T.R=Math.max(30,Math.min(54,Math.min(W,H)*.075))}
-function tbGo(){if(!TB)return;
-  Object.assign(TB,{W:0,H:0,pieces:[],fx:[],texts:[],trail:[],t:0,spawn:.3,lives:3,score:0,cuts:0,orders:0,pow:{},order:null,orderNext:2.5,queue:[],dur:HB.dur,paused:false,shown:-1});
-  hbSize();
-  const m=$('#tbMsg');let n=3;const cd=()=>{if(!TB)return;if(n>0){m.innerHTML=`<div class="tb-count">${n}</div>`;sfx.tap();n--;setTimeout(cd,700)}else{m.innerHTML='';TB.run=true;TB.last=performance.now();requestAnimationFrame(tbLoop)}};cd()}
-function hbSpawn(kind,v){const T=TB,r=kind==='num'?T.R:T.R*.9;
+function hbGo(){if(!HS)return;
+  Object.assign(HS,{W:0,H:0,pieces:[],fx:[],texts:[],trail:[],t:0,spawn:.3,lives:3,score:0,cuts:0,orders:0,pow:{},order:null,orderNext:2.5,queue:[],dur:HB.dur,paused:false,shown:-1});
+  HS.sw.clear();hbSize();
+  const m=$('#hbMsg');let n=3;const cd=()=>{if(!HS)return;if(n>0){m.innerHTML=`<div class="tb-count">${n}</div>`;sfx.tap();n--;setTimeout(cd,700)}else{m.innerHTML='';HS.run=true;HS.last=performance.now();requestAnimationFrame(hbLoop)}};cd()}
+function hbSpawn(kind,v){const T=HS,r=kind==='num'?T.R:T.R*.9;
   T.pieces.push({kind,v,r,x:r+Math.random()*(T.W-2*r),y:-r,vx:(Math.random()-.5)*T.W*.1,vy:T.H*(.05+Math.random()*.07),cuts:0,born:T.t,rot:(Math.random()-.5)*.4,vr:(Math.random()-.5)*1.2})}
-function hbPick(){const T=TB,prog=Math.min(1,T.t/T.dur),x=Math.random();
-  if(x<.07+.09*prog&&T.t>3)return hbSpawn('skull');
+function hbNum(){const C=HS.cfg;return C.even?2*rnd(1,C.max/2):rnd(1,C.max)}
+function hbPick(){const T=HS,prog=Math.min(1,T.t/T.dur),x=Math.random();
+  if(x<.07+.09*prog&&T.t>3)return hbSpawn('bad');
   if(x>.965&&T.t>8&&!(T.pow.slow>T.t)&&!(T.pow.fire>T.t))return hbSpawn(Math.random()<.5?'slow':'fire');
   if(T.queue.length&&Math.random()<.55)return hbSpawn('num',T.queue.shift());
-  hbSpawn('num',rnd(1,100))}
-function hbNewOrder(){const T=TB;let n,k,tries=0;
-  do{n=rnd(3,100);k=rnd(1,3)}while(n%Math.pow(2,k)===0&&tries++<20); // aim for a decimal half most of the time
-  const tgt=r3(n/Math.pow(2,k));T.order={T:tgt,n,k,at:T.t};T.queue.push(n);setTimeout(()=>{if(TB&&TB.order&&TB.order.n===n)TB.queue.push(n)},6000);
+  hbSpawn('num',hbNum())}
+function hbNewOrder(){const T=HS,C=T.cfg,dec=C.dp>0&&Math.random()<.7;let n,k,tries=0;
+  // n halves k times without going past the band's decimal places; most orders land on a decimal when the band has them
+  do{n=C.even?2*rnd(2,C.max/2):rnd(3,C.max);k=rnd(1,C.k)}
+  while((Math.round(n*Math.pow(10,C.dp))%Math.pow(2,k)!==0||(dec&&n%Math.pow(2,k)===0))&&tries++<80);
+  if(tries>80){n=8;k=1}
+  T.order={T:r3(n/Math.pow(2,k)),n,k,at:T.t};T.queue.push(n);setTimeout(()=>{if(HS&&HS.order&&HS.order.n===n)HS.queue.push(n)},6000);
   hbOrderHTML();sfx.hint()}
 function hbChain(o){const s=[o.n];for(let i=0;i<o.k;i++)s.push(r3(s[s.length-1]/2));return s.join(' → ')}
-function hbOrderHTML(){const T=TB,el=$('#hbOrder');if(!el)return;const o=T.order;
-  el.innerHTML=o?`📜 Blacksmith's order: make a <b>${r3(o.T)}</b>${T.t-o.at>10?`<span class="hb-hint">Try ${hbChain(o)}</span>`:''}`:'';el.classList.toggle('on',!!o)}
-function hbText(x,y,txt,col='#fff',size=22,life=1){TB.texts.push({x,y,txt,col,size,life,max:life})}
-function hbBurst(x,y,col,n=10,coins=0){const T=TB;for(let i=0;i<n;i++){const a=Math.random()*Math.PI*2,s=(.15+Math.random()*.35)*T.R*8;T.fx.push({x,y,vx:Math.cos(a)*s,vy:Math.sin(a)*s-T.R*3,life:.6+Math.random()*.3,col,e:i<coins?'🪙':null})}}
-function hbSwipe(a,b){const T=TB,dx=b.x-a.x,dy=b.y-a.y,len=Math.hypot(dx,dy);if(len<2)return;
+function hbOrderHTML(){const T=HS,el=$('#hbOrder');if(!el)return;const o=T.order;
+  el.innerHTML=o?`${HB_THEME.order}: make a <b>${r3(o.T)}</b>${T.t-o.at>10?`<span class="hb-hint">Try ${hbChain(o)}</span>`:''}`:'';el.classList.toggle('on',!!o)}
+function hbText(x,y,txt,col='#fff',size=22,life=1){HS.texts.push({x,y,txt,col,size,life,max:life})}
+function hbBurst(x,y,col,n=10,coins=0){const T=HS;for(let i=0;i<n;i++){const a=Math.random()*Math.PI*2,s=(.15+Math.random()*.35)*T.R*8;T.fx.push({x,y,vx:Math.cos(a)*s,vy:Math.sin(a)*s-T.R*3,life:.6+Math.random()*.3,col,e:i<coins?'🪙':null})}}
+function hbSwipe(s,b){const T=HS,a=s.last,dx=b.x-a.x,dy=b.y-a.y,len=Math.hypot(dx,dy);if(len<2)return;
   for(const p of T.pieces.slice()){if(p.dead||T.t-p.born<.22)continue;
     const t=Math.max(0,Math.min(1,((p.x-a.x)*dx+(p.y-a.y)*dy)/(len*len))),cx=a.x+dx*t,cy=a.y+dy*t;
-    if(Math.hypot(p.x-cx,p.y-cy)<p.r)hbCut(p,dx/len,dy/len)}}
-function hbCut(p,ux,uy){const T=TB;p.dead=true;T.pieces.splice(T.pieces.indexOf(p),1);
+    if(Math.hypot(p.x-cx,p.y-cy)<p.r){s.count++;hbCut(p,dx/len,dy/len)}}}
+function hbCut(p,ux,uy){const T=HS;p.dead=true;T.pieces.splice(T.pieces.indexOf(p),1);
   T.fx.push({slash:1,x:p.x,y:p.y,ux,uy,r:p.r,life:.18});
-  if(p.kind==='skull'){T.lives--;T.flash=.35;sfx.wrong();hbText(p.x,p.y,'💀 Cursed!','#ff6b6b',26);hbBurst(p.x,p.y,'#9b6bff',12);hbHud();if(T.lives<=0)tbEnd('lives');return}
+  if(p.kind==='bad'){T.lives--;T.flash=.35;sfx.wrong();hbText(p.x,p.y,HB_THEME.badTxt,'#ff6b6b',26);hbBurst(p.x,p.y,'#6b9cff',12);hbHud();if(T.lives<=0)hbEnd('lives');return}
   if(p.kind==='slow'){T.pow.slow=T.t+6;sfx.chest();hbText(T.W/2,T.H*.35,'⏳ Slow motion!','#bfe3ff',30,1.4);hbHud();return}
-  if(p.kind==='fire'){T.pow.fire=T.t+8;sfx.chest();hbText(T.W/2,T.H*.35,'🔥 Flaming blade! ×2','#ffb03d',30,1.4);hbHud();return}
-  const mult=T.pow.fire>T.t?2:1;if(T.sw)T.sw.count++;T.cuts++;
-  if(p.cuts<HB.maxCuts&&halfOk(p.v)){
+  if(p.kind==='fire'){T.pow.fire=T.t+8;sfx.chest();hbText(T.W/2,T.H*.35,HB_THEME.fire,'#ffb03d',30,1.4);hbHud();return}
+  const mult=T.pow.fire>T.t?2:1;T.cuts++;
+  if(p.cuts<T.cfg.cuts&&hbHalfOk(p.v)){
     const h=r3(p.v/2),nx=-uy,ny=ux,jump=T.H*(.4-.03*p.cuts),spread=T.W*.15,r=Math.max(T.R*.6,p.r*.88);
     const kids=[-1,1].map(s=>({kind:'num',v:h,r,x:p.x+nx*s*p.r*.45,y:p.y+ny*s*p.r*.45,vx:p.vx*.3+nx*s*spread,vy:-jump+ny*s*spread*.3,cuts:p.cuts+1,born:T.t,rot:0,vr:0,gold:p.gold}));
     T.pieces.push(...kids);T.score+=mult;
     tone(1500-p.cuts*180,.09,'triangle',.05,0,600);
     if(T.order&&same(h,T.order.T)){const g=15+5*T.order.k;T.score+=g*mult;T.orders++;kids.forEach(k=>k.gold=true);
-      hbText(T.W/2,T.H*.42,`Order forged! +${g*mult} 🔨`,'#ffd23d',32,1.6);hbBurst(p.x,p.y,'#ffd23d',16,4);sfx.chest();T.order=null;T.orderNext=T.t+1.6;hbOrderHTML()}
+      hbText(T.W/2,T.H*.42,`${HB_THEME.made} +${g*mult} ${HB_THEME.madeE}`,'#ffd23d',32,1.6);hbBurst(p.x,p.y,'#ffd23d',16,4);sfx.chest();T.order=null;T.orderNext=T.t+1.6;hbOrderHTML()}
   }else{T.score+=2*mult;hbBurst(p.x,p.y,'#ffd23d',10,3);hbText(p.x,p.y,`+${2*mult}`,'#ffd23d',24);tone(1900,.12,'sine',.05);tone(2500,.14,'sine',.04,.06)}
   hbHud()}
-function hbHud(){const T=TB,s=$('#hbScore');if(!s)return;s.textContent=T.score;$('#hbLives').textContent='❤️'.repeat(Math.max(0,T.lives))+'🤍'.repeat(Math.max(0,3-T.lives));
+function hbHud(){const T=HS,s=$('#hbScore');if(!s)return;s.textContent=T.score;$('#hbLives').textContent='❤️'.repeat(Math.max(0,T.lives))+'🤍'.repeat(Math.max(0,3-T.lives));
   const pw=$('#hbPow'),txt=(T.pow.fire>T.t?'🔥 ×2 ':'')+(T.pow.slow>T.t?'⏳ slow':'');pw.textContent=txt;pw.classList.toggle('on',!!txt)}
-function tbLoop(now){const T=TB;if(!T||!T.run)return;if(T.paused){T.last=now;return requestAnimationFrame(tbLoop)}
+function hbLoop(now){const T=HS;if(!T||!T.run)return;if(T.paused){T.last=now;return requestAnimationFrame(hbLoop)}
   const raw=Math.max(0,Math.min(.05,(now-T.last)/1000));T.last=now;T.t+=raw;hbSize();
   const prog=Math.min(1,T.t/T.dur),slow=T.pow.slow>T.t,dt=raw*(slow?.45:1),g=T.H*(.2+.12*prog);
-  T.spawn-=dt;if(T.spawn<=0){if(T.pieces.length<HB.maxOnScreen)hbPick();T.spawn=Math.max(.5,1.05-.45*prog)*(.8+Math.random()*.4)}
+  T.spawn-=dt;if(T.spawn<=0){if(T.pieces.length<HB.maxOnScreen)hbPick();T.spawn=Math.max(.5,1.05-.45*prog)*T.cfg.spawn*(.8+Math.random()*.4)}
   if(!T.order&&T.t>=T.orderNext)hbNewOrder();
   if(T.order&&T.t-T.order.at>24){hbText(T.W/2,T.H*.4,'Order gone… here comes a new one!','#fff',22,1.4);T.order=null;T.orderNext=T.t+1;hbOrderHTML()}
   if(T.order&&T.t-T.order.at>10&&!T.order.hinted){T.order.hinted=true;hbOrderHTML()}
@@ -2891,13 +2937,13 @@ function tbLoop(now){const T=TB;if(!T||!T.run)return;if(T.paused){T.last=now;ret
   hbDraw();
   const left=Math.max(0,T.dur-T.t),tl=$('#hbTime');if(tl)tl.style.width=(left/T.dur*100)+'%';
   if(Math.ceil(left)!==T.shown){T.shown=Math.ceil(left);hbHud()}
-  if(left<=0)return tbEnd('time');
-  requestAnimationFrame(tbLoop)}
-function hbDraw(){const T=TB,c=T.ctx;c.clearRect(0,0,T.W,T.H);
+  if(left<=0)return hbEnd('time');
+  requestAnimationFrame(hbLoop)}
+function hbDraw(){const T=HS,c=T.ctx;c.clearRect(0,0,T.W,T.H);
   if(T.flash){c.fillStyle=`rgba(200,40,60,${T.flash*.5})`;c.fillRect(0,0,T.W,T.H)}
   for(const p of T.pieces){c.save();c.translate(p.x,p.y);
-    if(p.kind!=='num'){c.fillStyle=p.kind==='skull'?'#3b2452':'#fff3c4';c.shadowColor=p.kind==='skull'?'#b44dff':'#ffd23d';c.shadowBlur=16;c.beginPath();c.arc(0,0,p.r,0,7);c.fill();c.shadowBlur=0;
-      c.font=`${Math.round(p.r*1.15)}px "Apple Color Emoji","Segoe UI Emoji","Noto Color Emoji",sans-serif`;c.textAlign='center';c.textBaseline='middle';c.fillText(p.kind==='skull'?'💀':p.kind==='slow'?'⏳':'🔥',0,p.r*.06);c.restore();continue}
+    if(p.kind!=='num'){c.fillStyle=p.kind==='bad'?'#243352':'#fff3c4';c.shadowColor=p.kind==='bad'?'#4d88ff':'#ffd23d';c.shadowBlur=16;c.beginPath();c.arc(0,0,p.r,0,7);c.fill();c.shadowBlur=0;
+      c.font=`${Math.round(p.r*1.15)}px "Apple Color Emoji","Segoe UI Emoji","Noto Color Emoji",sans-serif`;c.textAlign='center';c.textBaseline='middle';c.fillText(p.kind==='bad'?HB_THEME.bad:p.kind==='slow'?'⏳':'🔥',0,p.r*.06);c.restore();continue}
     if(p.gold){c.shadowColor='#ffd23d';c.shadowBlur=22}
     c.fillStyle=p.gold?'#e0a019':HB.colors[Math.min(p.cuts,HB.colors.length-1)];c.beginPath();c.arc(0,0,p.r,0,7);c.fill();c.shadowBlur=0;
     c.lineWidth=Math.max(3,p.r*.1);c.strokeStyle='rgba(255,255,255,.85)';c.beginPath();c.arc(0,0,p.r*.82,0,7);c.stroke();
@@ -2908,17 +2954,59 @@ function hbDraw(){const T=TB,c=T.ctx;c.clearRect(0,0,T.W,T.H);
   for(const f of T.fx){if(f.slash){const a=f.life/.18;c.strokeStyle=`rgba(255,255,255,${a})`;c.lineWidth=4*a+1;c.beginPath();c.moveTo(f.x-f.ux*f.r*1.5,f.y-f.uy*f.r*1.5);c.lineTo(f.x+f.ux*f.r*1.5,f.y+f.uy*f.r*1.5);c.stroke();continue}
     c.globalAlpha=Math.min(1,f.life*2);if(f.e){c.font=`${Math.round(T.R*.6)}px "Apple Color Emoji","Segoe UI Emoji",sans-serif`;c.textAlign='center';c.textBaseline='middle';c.fillText(f.e,f.x,f.y)}else{c.fillStyle=f.col;c.beginPath();c.arc(f.x,f.y,3.5,0,7);c.fill()}c.globalAlpha=1}
   if(T.trail.length>1){const fire=T.pow.fire>T.t;c.lineCap='round';c.lineJoin='round';c.shadowColor=fire?'#ff7a1a':'#9fd0ff';c.shadowBlur=14;
-    for(let i=1;i<T.trail.length;i++){const a=T.trail[i-1],b=T.trail[i],k=1-(T.t-b.t)/.16;c.strokeStyle=fire?`rgba(255,190,90,${k})`:`rgba(255,255,255,${k})`;c.lineWidth=2+k*9;c.beginPath();c.moveTo(a.x,a.y);c.lineTo(b.x,b.y);c.stroke()}c.shadowBlur=0}
+    for(let i=1;i<T.trail.length;i++){const a=T.trail[i-1],b=T.trail[i];if(a.id!==b.id)continue;const k=1-(T.t-b.t)/.16;c.strokeStyle=fire?`rgba(255,190,90,${k})`:`rgba(255,255,255,${k})`;c.lineWidth=2+k*9;c.beginPath();c.moveTo(a.x,a.y);c.lineTo(b.x,b.y);c.stroke()}c.shadowBlur=0}
   for(const x of T.texts){c.globalAlpha=Math.min(1,x.life/x.max*2);c.font=`800 ${Math.round(x.size)}px 'Baloo 2',system-ui,sans-serif`;c.textAlign='center';c.textBaseline='middle';c.lineWidth=5;c.strokeStyle='rgba(20,28,48,.85)';c.strokeText(x.txt,x.x,x.y);c.fillStyle=x.col;c.fillText(x.txt,x.x,x.y);c.globalAlpha=1}}
-function tbEnd(why){const T=TB;if(!T||!T.run)return;T.run=false;T.pieces=[];hbDraw();
+function hbEnd(why){const T=HS;if(!T||!T.run)return;T.run=false;T.pieces=[];T.sw.clear();hbDraw();
   const b=bonusState(),pb=T.score>b.hbBest;if(pb)b.hbBest=T.score;const y=Math.min(10,Math.floor(T.score/12));S.yarn+=y;save();
+  if(T.score>0)boardSubmit('blade',T.score).then(r=>{const el=$('#hbRank');if(el)el.innerHTML=boardRankLine(r)});
   sfx.finish();if(pb&&T.score>0)confetti(70);const o=$('#hbOrder');if(o){o.innerHTML='';o.classList.remove('on')}
-  $('#tbMsg').innerHTML=`<div class="tb-card"><h2>${why==='lives'?'Too many skulls!':why==='quit'?'Game over':"Time's up!"}</h2><div id="tbEndCat">${catHTML(cs(120),'happy')}</div><div class="tb-final">${T.score}</div><p>${pb&&T.score>0?'<b>New best score!</b> 🎉':`Best: <b>${b.hbBest}</b>`}</p><p class="tiny">${T.cuts} slices · ${T.orders} order${T.orders===1?'':'s'} forged${y?` · +${y} 🪙`:''}</p>
-   <div class="row" style="margin-top:8px"><button class="btn sun" data-act="tbAgain">Play again ↻</button><button class="btn ghost" data-act="tbDone">Done</button></div></div>`;
-  setTimeout(()=>{const c=$('#tbEndCat .cat');if(c){const w=winMove();if(w)doMove(c,w);else celebrate(c)}},700);
+  $('#hbMsg').innerHTML=`<div class="tb-card"><h2>${why==='lives'?'Out of hearts!':why==='quit'?'Game over':"Time's up!"}</h2><div id="hbEndCat">${catHTML(cs(120),'happy')}</div><div class="tb-final">${T.score}</div><p>${pb&&T.score>0?'<b>New best score!</b> 🎉':`Best: <b>${b.hbBest}</b>`}</p><p class="tiny">${T.cuts} slices · ${T.orders} order${T.orders===1?'':'s'} done${y?` · +${y} 🪙`:''}</p><p id="hbRank" class="tb-rank"></p>
+   <div class="row" style="margin-top:8px"><button class="btn sun" data-act="hbAgain">Play again ↻</button><button class="btn" data-act="hof" data-g="blade">🏆 Hall of Fame</button><button class="btn ghost" data-act="hbDone">Done</button></div></div>`;
+  setTimeout(()=>{const c=$('#hbEndCat .cat');if(c){const w=winMove();if(w)doMove(c,w);else celebrate(c)}},700);
   if(readAloud())setTimeout(()=>speak(`You scored ${T.score}!`),900)}
-function tbClose(){if(TB)TB.run=false;TB=null;const d=$('#blade');if(d)d.remove();render()}
-document.addEventListener('visibilitychange',()=>{if(TB&&TB.run&&document.hidden){TB.paused=true;$('#tbMsg').innerHTML=`<div class="tb-card"><h2>Paused ⏸️</h2><button class="btn big" data-act="tbResume">Keep going ▶</button></div>`}});
+function hbClose(){if(HS)HS.run=false;HS=null;const d=$('#blade');if(d)d.remove();render()}
+document.addEventListener('visibilitychange',()=>{if(HS&&HS.run&&document.hidden){HS.paused=true;HS.sw.clear();$('#hbMsg').innerHTML=`<div class="tb-card"><h2>Paused ⏸️</h2><button class="btn big" data-act="hbResume">Keep going ▶</button></div>`}});
+
+/* ---------------- Hall of Fame: arcade high scores, one board per game ----------------
+   The database keeps only the first name, the cat's look, the warrior rank and the scores.
+   Grown-ups can hide a player (Grown-ups corner); hidden players never appear on any board and stop posting. */
+const HOF_GAMES={
+  siege:{key:'warrior:siege',name:'CATAPULT SIEGE',title:'Catapult Siege',best:()=>bonusState().best,how:'Beat a guardian, play Catapult Siege, and be the first!'},
+  blade:{key:'warrior:blade',name:'HALVING BLADE',title:'Halving Blade',best:()=>bonusState().hbBest,how:'Play Halving Blade in Training and be the first!'}};
+function boardName(){return cloudName(S.name)}
+function firstName(n){const f=String(n||'').trim().split(/\s+/)[0]||'';return (f.charAt(0).toUpperCase()+f.slice(1).toLowerCase()).slice(0,12)}
+function boardOn(){return !!S.cloud&&!!S.pinHash&&!S.settings.hideBoard}
+async function boardSubmit(g,score,weekly=true){if(!boardOn()||!HOF_GAMES[g])return null;
+  try{const r=await rpc('wa_score_submit',{p_name:boardName(),p_pin:S.pinHash,p_score:score,p_cat:{f:S.fur,e:S.equipped},p_keeper:rankInfo().name,p_weekly:weekly,p_game:HOF_GAMES[g].key});
+    if(r&&r.hidden&&!S.settings.hideBoard){S.settings.hideBoard=true;save()}return r}catch(e){return null}}
+function boardRankLine(r){if(!r||!r.ok||r.hidden)return '';
+  return r.rank_week===1?'🏆 <b>#1 this week!</b>':r.rank_week&&r.rank_week<=10?`🏆 You're <b>#${r.rank_week}</b> this week!`:r.rank_all<=10?`🏆 You're <b>#${r.rank_all}</b> of all time!`:''}
+async function boardHide(h){S.settings.hideBoard=h;save();render();
+  try{const r=await rpc('wa_score_hide',{p_name:boardName(),p_pin:S.pinHash,p_hidden:h,p_game:Object.values(HOF_GAMES)[0].key});
+    if(!h)for(const g in HOF_GAMES){const best=HOF_GAMES[g].best();if(best)boardSubmit(g,best,false)}
+    toast(`<span class="ti">🏆</span><div>${r&&r.ok?(h?`${esc(firstName(S.name))} is hidden from the Hall of Fame.`:`${esc(firstName(S.name))} is back on the Hall of Fame.`):'Saved on this device. The board will update next time there is internet.'}</div>`)}
+  catch(e){toast('<span class="ti">☁️</span><div>No internet right now. Try again soon.</div>')}}
+const HOF_MED=['🥇','🥈','🥉'];
+function hofRows(top,G){if(!top.length)return `<div class="hof-empty">NO SCORES YET<br><small>${G.how}</small></div>`;
+  return '<ol class="hof-list">'+top.map((t,i)=>{const c=t.c||{};return `<li class="hof-row ${t.me?'me':''} p${i+1}"><span class="hof-pos">${HOF_MED[i]||(i+1)+'TH'}</span><span class="hof-cat">${catHTML(cs(50),'happy',{fur:FURS[c.f]?c.f:'ginger',equipped:c.e&&typeof c.e==='object'?c.e:{}})}</span><span class="hof-who"><b>${esc(t.n||'?')}</b><small>${esc(t.r||'warrior')}</small></span><span class="hof-score">${String(t.s||0).padStart(5,'0')}</span></li>`}).join('')+'</ol>'}
+async function openBoard(period,game){
+  period=period||UI.hofTab||'all';game=HOF_GAMES[game]?game:HOF_GAMES[UI.hofGame]?UI.hofGame:Object.keys(HOF_GAMES)[0];UI.hofTab=period;UI.hofGame=game;sfx.tap();
+  const G=HOF_GAMES[game];
+  const games=`<div class="hof-tabs">${Object.keys(HOF_GAMES).map(g=>`<button class="${g===game?'on':''}" data-act="hof" data-g="${g}" data-p="${period}">${HOF_GAMES[g].name}</button>`).join('')}</div>`;
+  const tabs=`<div class="hof-tabs"><button class="${period==='all'?'on':''}" data-act="hof" data-p="all" data-g="${game}">ALL-TIME</button><button class="${period==='week'?'on':''}" data-act="hof" data-p="week" data-g="${game}">THIS WEEK</button></div>`;
+  const shell=body=>`<div class="hof"><div class="hof-title">🏆 HALL OF FAME 🏆</div><div class="hof-sub">${G.name} · HIGH SCORES</div>${games}${tabs}${body}<button class="btn ghost hof-close" data-act="close">Close</button></div>`;
+  modal(shell('<div class="hof-empty blink">LOADING…</div>'));const m=$('#overlay .modal');if(m)m.classList.add('hofm');
+  UI.hofSynced=UI.hofSynced||{};if(boardOn()&&G.best()&&!UI.hofSynced[game]){UI.hofSynced[game]=true;await boardSubmit(game,G.best(),false)}
+  let d=null;try{d=await rpc('wa_board',{p_period:period,p_name:boardName(),p_game:G.key})}catch(e){}
+  if(!$('#overlay .hof')||UI.hofTab!==period||UI.hofGame!==game)return;
+  let me='';
+  if(!d)me='<div class="hof-me">NO INTERNET. TRY AGAIN SOON!</div>';
+  else if(S.settings.hideBoard||(d.me&&d.me.hidden))me=`<div class="hof-me">${esc(firstName(S.name))} IS HIDDEN FROM THE BOARD<br><small>A grown-up can change this in ⚙️ Grown-ups corner</small></div>`;
+  else if(!S.cloud)me='<div class="hof-me">TURN ON CLOUD SAVE TO JOIN THE BOARD</div>';
+  else if(d.me&&d.me.s>0&&!(d.top||[]).some(t=>t.me))me=`<div class="hof-me">YOU: #${d.me.rank} · ${String(d.me.s).padStart(5,'0')}</div>`;
+  else if(!(d.me&&d.me.s>0))me=`<div class="hof-me blink">★ ${period==='week'?'NO SCORE THIS WEEK YET':`PLAY ${G.name} TO GET ON THE BOARD`} ★</div>`;
+  const ov=$('#overlay .modal');if(ov)ov.innerHTML=shell((d?hofRows(d.top||[],G):'')+me);
+}
 
 /* ---------------- daily gift & streak ---------------- */
 function checkDaily(){
@@ -3118,8 +3206,15 @@ const ACT={
   tbGo:()=>tbGo(),
   tbQuit:()=>{if(TB&&TB.run)tbEnd('quit');else tbClose()},
   tbDone:()=>tbClose(),
-  tbAgain:()=>{tbClose();startBlade()},
+  hof:d=>openBoard(d.p,d.g),
   blade:()=>{sfx.tap();startBlade()},
+  hbGo:()=>hbGo(),
+  hbQuit:()=>{if(HS&&HS.run)hbEnd('quit');else hbClose()},
+  hbDone:()=>hbClose(),
+  hbAgain:()=>{hbClose();startBlade()},
+  hbResume:()=>{if(HS){$('#hbMsg').innerHTML='';HS.paused=false}},
+  hofHide:d=>boardHide(d.v==='1'),
+  tbAgain:()=>{tbClose();startBonus()},
   tbResume:()=>{if(TB){$('#tbMsg').innerHTML='';TB.paused=false}},
   sgGo:()=>sgGo(),
   sgQuit:()=>{if(SG&&SG.run)sgEnd('quit');else sgClose()},
