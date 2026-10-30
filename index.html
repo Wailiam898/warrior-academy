@@ -600,6 +600,32 @@ button.me{cursor:pointer}
   .play-right{position:sticky;top:16px}
 }
 
+/* Hall of Fame: old-school arcade high-score table */
+.modal.hofm{background:#120d2e;color:#fff;border:4px solid #ffc43d;box-shadow:0 0 0 4px #120d2e,0 0 30px #6f9fff,0 20px 60px rgba(0,0,0,.5)}
+.hof{font-family:"Courier New",ui-monospace,monospace;font-weight:900;text-transform:uppercase}
+.hof-title{font-size:26px;color:#ffd84a;text-shadow:0 0 8px #ff9a3d,3px 3px 0 #4a7ad9;letter-spacing:2px}
+.hof-sub{font-size:13px;color:#7fe8ff;letter-spacing:3px;margin:2px 0 8px}
+.hof-tabs{display:flex;gap:6px;justify-content:center;margin-bottom:8px}
+.hof-tabs button{font:inherit;font-size:14px;color:#8fa2c7;background:#221a4d;border-radius:10px;padding:6px 12px}
+.hof-tabs button.on{color:#120d2e;background:#7fe8ff}
+.hof-list{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:4px}
+.hof-row{display:grid;grid-template-columns:3.2em auto 1fr auto;align-items:center;gap:8px;background:#1d1645;border-radius:12px;padding:3px 10px;text-align:left}
+.hof-row.p1{background:linear-gradient(90deg,#4a3a00,#1d1645)}.hof-row.p2{background:linear-gradient(90deg,#3b3f4f,#1d1645)}.hof-row.p3{background:linear-gradient(90deg,#4a2a14,#1d1645)}
+.hof-row.me{outline:3px solid #6f9fff;animation:hofMe 1.2s steps(2) infinite}
+@keyframes hofMe{50%{outline-color:#ffd84a}}
+.hof-pos{font-size:18px;color:#ffd84a;text-align:center}
+.hof-who{display:flex;flex-direction:column;line-height:1.1;min-width:0}
+.hof-who b{font-size:18px;color:#fff;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.hof-who small{font-size:10px;color:#7fe8ff;letter-spacing:1px;font-weight:700}
+.hof-score{font-size:20px;color:#7dff8a;text-shadow:0 0 6px #2bd14a;letter-spacing:1px}
+.hof-me{margin-top:10px;color:#ffd84a;font-size:15px}.hof-me small{color:#8fa2c7;font-size:11px}
+.hof-empty{padding:26px 0;color:#7fe8ff;font-size:18px}.hof-empty small{color:#8fa2c7;font-size:12px}
+.blink{animation:hofBlink 1s steps(2) infinite}
+@keyframes hofBlink{50%{opacity:.25}}
+.hof-close{margin-top:12px;font-family:inherit}
+.hofbtn{font-size:22px;padding:6px 10px;margin-left:4px}
+.tb-rank{color:#3f70d1;font-weight:800;min-height:1.2em;margin:2px 0}
+
 /* accessories inside the knight drawing */
 .cat .acc2{font-family:"Apple Color Emoji","Segoe UI Emoji","Noto Color Emoji",sans-serif;pointer-events:none}
 .wintag{position:absolute;top:-9px;left:50%;transform:translateX(-50%);background:var(--sun,#ffc43d);color:#2a364f;font-size:11px;font-weight:800;border-radius:99px;padding:1px 8px;white-space:nowrap}
@@ -2264,6 +2290,8 @@ function parentsView(){
    <div class="row" style="justify-content:flex-start;margin-top:8px"><b>Age</b><span>${S.age?(S.age>=14?'14+':S.age):'not set'}</span><button class="chip" data-act="ageChange">Change age</button></div>
    <p class="tiny" style="margin:2px 0 0">${BAND_LABEL[band()]}</p>
    <div class="row" style="justify-content:flex-start;margin-top:8px"><b>Secret code</b><span>🔐 ${S.pinHash?'set':'not set'}</span><button class="chip" data-act="pinChange">Change code</button></div>
+   <div class="row" style="justify-content:flex-start;margin-top:8px"><b>Hall of Fame</b><button class="chip ${!S.settings.hideBoard?'on':''}" data-act="hofHide" data-v="0">Show ${esc(firstName(S.name))}</button><button class="chip ${S.settings.hideBoard?'on':''}" data-act="hofHide" data-v="1">Hide</button><button class="chip" data-act="hof">🏆 View</button></div>
+   <p class="tiny" style="margin:2px 0 0">The Treat Tumble high-score board is seen by everyone who plays Whisker Academy. It only ever shows a <b>first name</b> (“${esc(firstName(S.name))}”), the knight picture, the warrior rank and the score. Hide takes ${esc(firstName(S.name))} off the board straight away and stops new scores being posted. ${S.cloud?'':'Only cloud-saved players appear on the board.'}</p>
    <div class="row" style="justify-content:flex-start;margin-top:8px"><b>Cloud save</b><span>${S.cloud?`☁️ saved as <b>${esc(S.name)}</b>`:'📱 this device only'}</span>${S.cloud?'':'<button class="chip" data-act="cloudJoin">Save to cloud</button>'}</div>
    <div class="row" style="justify-content:flex-start;margin-top:8px"><b>This device</b><button class="chip" data-act="signOut">Sign out</button><button class="chip" data-act="reset">Start over…</button></div>
    <p class="tiny" style="margin-top:6px">To play on another device, open the game there and type the same name <b>${esc(S.name)}</b>. They'll also need the 4-number secret code. Sign out keeps the cloud save; Start over erases it on this device and in the cloud.</p></div>
@@ -2281,7 +2309,7 @@ function parentsView(){
    <li><b>No time pressure by default</b> (Boaler: timed tests drive maths anxiety). The Lightning Round is optional, and players only race their own best score.</li>
    <li><b>Self-Determination Theory.</b> Autonomy (they pick the realm, table and gear), competence (stars, mastery bars) and relatedness (a named knight who cheers them on).</li>
    <li><b>Game loop, made kind.</b> Short 2–4 minute levels, 3-star ratings, a level map, combos, mystery gifts, a sticker collection and a daily gift. There are <b>no</b> lives in the maths, no losing, no ads and no purchases. A missed day is forgiven, and a break reminder pops up after a set time.</li>
-   <li><b>Halving Blade, in Training any time.</b> Numbers from 1 to 100 fall down the screen and a swipe cuts one in half. Even numbers split into whole halves (8 → 4 + 4), odd numbers into decimals (7 → 3.5 + 3.5), and each half hops up and can be cut again (3.5 → 1.75 + 1.75), up to 4 cuts or 3 decimal places. Every cut shows the sum, such as 7 ÷ 2 = 3.5, and blacksmith orders ask for one exact half, so players work out halving chains like 25 → 12.5 → 6.25. A round lasts a minute. ${S.bonus&&S.bonus.hbPlays?`Played ${S.bonus.hbPlays} time${S.bonus.hbPlays>1?'s':''} so far, best score ${S.bonus.hbBest}.`:''}</li>
+   <li><b>Halving Blade, in Training any time.</b> Numbers from 1 to 100 fall down the screen and a swipe cuts one in half. Even numbers split into whole halves (8 → 4 + 4), odd numbers into decimals (7 → 3.5 + 3.5), and each half hops up and can be cut again (3.5 → 1.75 + 1.75), up to 4 cuts or 3 decimal places. Blacksmith orders ask for one exact half, so players work out halving chains like 25 → 12.5 → 6.25. A round lasts a minute. ${S.bonus&&S.bonus.hbPlays?`Played ${S.bonus.hbPlays} time${S.bonus.hbPlays>1?'s':''} so far, best score ${S.bonus.hbBest}.`:''}</li>
    <li><b>Bonus game, earned not given: Catapult Siege.</b> A one-minute game with no maths in it: fling boulders at goblins on a crumbling castle. A play is earned only by beating a realm's guardian (level 7) for the first time, so there is one per realm, and unused plays are saved. ${S.bonus&&S.bonus.plays?`Played ${S.bonus.plays} time${S.bonus.plays>1?'s':''} so far, best score ${S.bonus.best}.`:''}</li>
    <li><b>Victory move.</b> Moves bought with gold can be picked in the Armoury. The knight does it at the end of every level.</li>
    <li><b>Tips:</b> 10–15 minutes a day works better than one long session. Ask them to teach <i>you</i> a strategy. Celebrate effort and the tricky facts they conquer.</li>
@@ -2867,7 +2895,6 @@ function hbCut(p,ux,uy){const T=TB;p.dead=true;T.pieces.splice(T.pieces.indexOf(
     const h=r3(p.v/2),nx=-uy,ny=ux,jump=T.H*(.4-.03*p.cuts),spread=T.W*.15,r=Math.max(T.R*.6,p.r*.88);
     const kids=[-1,1].map(s=>({kind:'num',v:h,r,x:p.x+nx*s*p.r*.45,y:p.y+ny*s*p.r*.45,vx:p.vx*.3+nx*s*spread,vy:-jump+ny*s*spread*.3,cuts:p.cuts+1,born:T.t,rot:0,vr:0,gold:p.gold}));
     T.pieces.push(...kids);T.score+=mult;
-    hbText(p.x,p.y-p.r,`${r3(p.v)} ÷ 2 = ${h}`,'#fff',Math.max(16,T.R*.42),1.1);
     tone(1500-p.cuts*180,.09,'triangle',.05,0,600);
     if(T.order&&same(h,T.order.T)){const g=15+5*T.order.k;T.score+=g*mult;T.orders++;kids.forEach(k=>k.gold=true);
       hbText(T.W/2,T.H*.42,`Order forged! +${g*mult} 🔨`,'#ffd23d',32,1.6);hbBurst(p.x,p.y,'#ffd23d',16,4);sfx.chest();T.order=null;T.orderNext=T.t+1.6;hbOrderHTML()}
@@ -3119,6 +3146,8 @@ const ACT={
   tbGo:()=>tbGo(),
   tbQuit:()=>{if(TB&&TB.run)tbEnd('quit');else tbClose()},
   tbDone:()=>tbClose(),
+  hof:d=>openBoard(d.p),
+  hofHide:d=>boardHide(d.v==='1'),
   tbAgain:()=>{tbClose();startBlade()},
   blade:()=>{sfx.tap();startBlade()},
   tbResume:()=>{if(TB){$('#tbMsg').innerHTML='';TB.paused=false}},
