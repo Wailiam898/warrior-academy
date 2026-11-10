@@ -639,6 +639,21 @@ button.me{cursor:pointer}
 .blink{animation:hofBlink 1s steps(2) infinite}
 @keyframes hofBlink{50%{opacity:.25}}
 .hof-close{margin-top:12px;font-family:inherit}
+/* friends */
+.fr-code{text-align:center;background:#fff;border-radius:22px;padding:12px 14px;box-shadow:var(--shadow)}
+.fr-code small{display:block;font-weight:800;color:var(--muted);letter-spacing:1px}
+.fr-code b{display:block;font-size:42px;letter-spacing:6px;color:var(--pink-d);line-height:1.2;user-select:all}
+.fr-add{display:flex;gap:8px;align-items:center;justify-content:center;flex-wrap:wrap;margin-top:6px}
+.fr-add .bigin{max-width:220px;height:54px;font-size:24px;letter-spacing:3px;text-transform:uppercase}
+.fr-list{display:flex;flex-direction:column;gap:8px}
+.fr-card{display:grid;grid-template-columns:auto 1fr auto;align-items:center;gap:10px;background:#fff;border-radius:20px;padding:8px 12px;box-shadow:var(--shadow)}
+.fr-card .who{min-width:0;text-align:left;line-height:1.2}
+.fr-card .who b{display:block;font-size:20px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.fr-card .who small{display:block;font-size:13px;color:var(--muted);font-weight:700}
+.fr-card .who .fr-stats{font-size:14px;color:var(--ink);font-weight:700;margin-top:2px}
+.fr-card .acts{display:flex;gap:6px;align-items:center}
+.fr-card .chip{min-height:40px;padding:4px 12px;font-size:15px}
+.fr-wait{font-size:15px;line-height:1.6}
 .hofbtn{font-size:22px;padding:6px 10px;margin-left:4px}
 .tb-rank{color:#3f70d1;font-weight:800;min-height:1.2em;margin:2px 0}
 
@@ -1790,8 +1805,8 @@ const lid=(r,l)=>REALMS[r].id+'-'+l;
 const totalStars=()=>REALMS.reduce((t,R,ri)=>t+R.levels.reduce((u,_,li)=>u+(S.stars[lid(ri,li)]||0),0),0);
 /* Age bands: the age a player gives picks which realms come first and how much support each question gets */
 function band(){return 'big'} // Warrior Academy is ages 9+ only
-const BAND_ORDER={little:['kitten','pond','bunny','ladybird','picnic','hive','meadow','snow','cloud','bakery','moon','river','star','cavern','library','market','lumen'],middle:['meadow','snow','cloud','bakery','river','moon','star','cavern','pie','library','harbour','market','lumen','kitten','pond','bunny','ladybird','picnic','hive'],big:['cloud','bakery','moon','pie','star','harbour','cavern','library','market','lumen','meadow','snow','river']};
-const BAND_REQ={little:{pond:['kitten'],ladybird:['bunny'],hive:['ladybird'],meadow:['ladybird'],cloud:['hive'],river:['bakery']},middle:{market:['cavern','river'],ladybird:[],hive:[]},big:{snow:[]}};
+const BAND_ORDER={little:['kitten','pond','ladybird','meadow','bunny','snow','hive','cloud','picnic','bakery','moon','river','star','cavern','library','market','lumen'],middle:['meadow','snow','cloud','bakery','river','moon','star','cavern','pie','library','harbour','market','lumen','kitten','pond','bunny','ladybird','picnic','hive'],big:['cloud','bakery','moon','pie','star','harbour','cavern','library','market','lumen','meadow','snow','river']};
+const BAND_REQ={little:{pond:['kitten'],ladybird:['pond'],meadow:['ladybird'],bunny:['meadow'],snow:['bunny'],hive:['snow'],cloud:['hive'],picnic:['cloud'],bakery:['picnic'],moon:['bakery'],river:['bakery']},middle:{market:['cavern','river'],ladybird:[],hive:[]},big:{snow:[]}};
 const BAND_LABEL={big:'Ages 9+: times tables and division first. Decimals start after the 3, 4 and 6 tables: tenths in The Jolly Tavern, then hundredths, place value, money and ×10 ÷10 in Smugglers’ Cove. Then remainders and two-step problems that mix all four operations. Addition and subtraction realms are bonus practice.'};
 function realmStarted(r){return REALMS[r].levels.some((_,i)=>S.stars[lid(r,i)])}
 function realmList(){const L=BAND_ORDER[band()].map(id=>REALMS.findIndex(R=>R.id===id)).filter(i=>i>=0);REALMS.forEach((_,i)=>{if(!L.includes(i)&&realmStarted(i))L.push(i)});return L}
@@ -2033,6 +2048,7 @@ function render(){
   else if(UI.tab==='album')body=albumView();
   else if(UI.tab==='draw')body=drawView();
   else if(UI.tab==='parents')body=parentsView();
+  else if(UI.tab==='friends'&&friendsOn())body=friendsView();
   app.innerHTML=topBar()+body+tabsNav();
   if(UI.tab==='draw')initStudio();
 }
@@ -2044,7 +2060,9 @@ function topBar(){
 function tabsNav(){
   const due=dueFacts().length;
   const t=[['map','🗺️','Map'],['practice','🎯','Training'],['closet','🛡️','Armoury'],['album','📒','Album'],['draw','🎨','Draw']];
-  return `<nav class="tabs">${t.map(([id,i,n])=>`<button class="${UI.tab===id?'on':''}" data-act="tab" data-tab="${id}"><span class="i">${i}</span>${n}${id==='practice'&&due>=3?`<span class="badge">${due}</span>`:''}</button>`).join('')}</nav>`;
+  if(friendsOn())t.push(['friends','🤝','Friends']);
+  const asks=UI.fr&&UI.fr.incoming?UI.fr.incoming.length:0;
+  return `<nav class="tabs">${t.map(([id,i,n])=>`<button class="${UI.tab===id?'on':''}" data-act="tab" data-tab="${id}"><span class="i">${i}</span>${n}${id==='practice'&&due>=3?`<span class="badge">${due}</span>`:''}${id==='friends'&&asks?`<span class="badge">${asks}</span>`:''}</button>`).join('')}</nav>`;
 }
 
 /* ---------------- MAP ---------------- */
@@ -2296,6 +2314,8 @@ function parentsView(){
    <div class="row" style="justify-content:flex-start;margin-top:8px"><b>Secret code</b><span>🔐 ${S.pinHash?'set':'not set'}</span><button class="chip" data-act="pinChange">Change code</button></div>
    <div class="row" style="justify-content:flex-start;margin-top:8px"><b>Hall of Fame</b><button class="chip ${!S.settings.hideBoard?'on':''}" data-act="hofHide" data-v="0">Show ${esc(firstName(S.name))}</button><button class="chip ${S.settings.hideBoard?'on':''}" data-act="hofHide" data-v="1">Hide</button><button class="chip" data-act="hof">🏆 View</button></div>
    <p class="tiny" style="margin:2px 0 0">The Hall of Fame boards (${Object.values(HOF_GAMES).map(g=>g.title).join(' and ')}) are seen by everyone who plays Warrior Academy. It only ever shows a <b>first name</b> (“${esc(firstName(S.name))}”), the knight picture, the warrior rank and the score. Hide takes ${esc(firstName(S.name))} off the board straight away and stops new scores being posted. ${S.cloud?'':'Only cloud-saved players appear on the boards.'}</p>
+   <div class="row" style="justify-content:flex-start;margin-top:8px"><b>Friends</b>${friendsReady()?`<button class="chip ${!S.settings.friendsOff?'on':''}" data-act="frOff" data-v="0">On</button><button class="chip ${S.settings.friendsOff?'on':''}" data-act="frOff" data-v="1">Off</button><button class="chip" data-act="frNewCode">🔁 New code</button>`:'<span>needs cloud save</span>'}</div>
+   <p class="tiny" style="margin:2px 0 0">Friends are added by typing each other's friend code, and the other player has to say yes. Friends can see ${esc(firstName(S.name))}'s <b>first name</b>, knight picture, stars, day streak and best arcade scores. <b>There is no chat or messaging.</b> Off hides ${esc(firstName(S.name))} from every friends list and stops new requests. “New code” makes the old code stop working; existing friends stay.</p>
    <div class="row" style="justify-content:flex-start;margin-top:8px"><b>Cloud save</b><span>${S.cloud?`☁️ saved as <b>${esc(S.name)}</b>`:'📱 this device only'}</span>${S.cloud?'':'<button class="chip" data-act="cloudJoin">Save to cloud</button>'}</div>
    <div class="row" style="justify-content:flex-start;margin-top:8px"><b>This device</b><button class="chip" data-act="signOut">Sign out</button><button class="chip" data-act="reset">Start over…</button></div>
    <p class="tiny" style="margin-top:6px">To play on another device, open the game there and type the same name <b>${esc(S.name)}</b>. They'll also need the 4-number secret code. Sign out keeps the cloud save; Start over erases it on this device and in the cloud.</p></div>
@@ -3008,6 +3028,104 @@ async function openBoard(period,game){
   const ov=$('#overlay .modal');if(ov)ov.innerHTML=shell((d?hofRows(d.top||[],G):'')+me);
 }
 
+/* ---------------- Friends ----------------
+   Friend codes, not name search. A request needs the other player to say yes. There is no chat of any kind.
+   The database returns only first names, knight looks, stars, streaks and best scores, and only between accepted friends.
+   Grown-ups corner switches Friends off (hides the player everywhere) or makes a new code. */
+const friendsReady=()=>!!S.cloud&&!!S.pinHash;
+const friendsOn=()=>friendsReady()&&!S.settings.friendsOff&&!UI.frMissing;
+const FR_ERR={nocode:"That code doesn't match anyone. Check it and try again!",self:"That's your own code! Give it to a friend instead.",slow:'Too many tries. Wait a few minutes, then try again.',off:'Friends are switched off. A grown-up can turn them on in ⚙️.',full:'That friends list is full.',auth:'Your game is still saving. Try again in a moment.',gone:'That friend code has changed. Ask your friend for the new one.'};
+const FR_NET='<span class="ti">☁️</span><div>No internet right now. Try again soon.</div>';
+function rankNameFor(st){let i=0;RANKS.forEach((r,j)=>{if(st>=r.min)i=j});return RANKS[i].name}
+function fmtCode(c){c=String(c||'');return c.length===6?c.slice(0,3)+' '+c.slice(3):c}
+function frArgs(extra){return Object.assign({p_name:boardName(),p_pin:S.pinHash},extra)}
+function friendsBadge(){const b=document.querySelector('.tabs button[data-tab=friends]');if(!b)return;let s=b.querySelector('.badge');const n=UI.fr&&UI.fr.incoming?UI.fr.incoming.length:0;
+  if(!n){if(s)s.remove();return}if(!s){s=document.createElement('span');s.className='badge';b.appendChild(s)}s.textContent=n}
+function friendsRender(){ // redraw the Friends tab without losing a half-typed code
+  if(UI.screen==='play'||$('#overlay'))return friendsBadge();
+  if(UI.tab!=='friends')return friendsBadge();
+  const i=$('#frCode'),v=i?i.value:'',f=!!i&&document.activeElement===i;render();
+  const j=$('#frCode');if(j){j.value=v;if(f){j.focus();try{j.setSelectionRange(v.length,v.length)}catch(e){}}}
+}
+async function friendsLoad(){
+  if(!friendsOn()||UI.frBusy)return;UI.frBusy=true;
+  try{
+    let r=await rpc('wa_friends',frArgs());
+    if(r&&!r.ok&&cloudOn()){await cloudPush();r=await rpc('wa_friends',frArgs())} // a brand-new save may not be uploaded yet
+    if(r&&r.ok){
+      if(!r.code){const m=await rpc('wa_friend_me',frArgs());if(m&&m.ok){r.code=m.code;r.off=m.off}}
+      UI.fr=r;UI.frErr='';
+      if(!!r.off!==!!S.settings.friendsOff){S.settings.friendsOff=!!r.off;save();if(r.off&&UI.tab==='friends')UI.tab='map';UI.frBusy=false;if(UI.screen!=='play'&&UI.tab!=='draw')render();return}
+    }else UI.frErr='wait';
+  }catch(e){
+    if(/ 404$/.test(String(e&&e.message))){UI.frMissing=true;if(UI.tab==='friends')UI.tab='map';UI.frBusy=false;if(UI.screen!=='play'&&UI.tab!=='draw')render();return} // Friends not installed on the server yet
+    UI.frErr='net'}
+  UI.frBusy=false;UI.frAt=Date.now();friendsRender();
+}
+function friendCat(c){c=c||{};const eq={};for(const s of Object.keys(SLOTS)){const id=c.e&&c.e[s];eq[s]=(id&&ITEM[id]&&ITEM[id].slot===s)?id:null}
+  return catHTML(cs(56),'happy',{fur:FURS[c.f]?c.f:'ginger',equipped:eq})}
+function agoText(d){return d<=0?'Played today':d===1?'Played yesterday':`Played ${d} days ago`}
+function friendRow(f,gs){
+  const bits=[`⭐ ${f.st}`,`🔥 ${f.sk}`];if(f.tb&&gs[0])bits.push(`${esc(gs[0].title)} ${f.tb}`);if(f.hb&&gs[1])bits.push(`${esc(gs[1].title)} ${f.hb}`);
+  return `<div class="fr-card">${friendCat(f.c)}<div class="who"><b>${esc(f.n)}</b><small>${esc(rankNameFor(f.st))} · ${agoText(f.d)}</small><div class="fr-stats">${bits.join(' · ')}</div></div><div class="acts"><button class="chip" aria-label="Remove ${esc(f.n)}" data-act="frRemove" data-code="${esc(f.code)}" data-n="${esc(f.n)}">✕</button></div></div>`}
+function friendsView(){
+  const head='<h2 class="sec">Friends 🤝</h2>',d=UI.fr;
+  if(!d)return head+`<div class="notes">${UI.frErr==='net'?'<p>Hmm, I can’t reach the internet right now.</p><button class="chip" data-act="frRetry">↻ Try again</button>':UI.frErr==='wait'?'<p>Your game is still saving to the cloud. Try again in a moment.</p><button class="chip" data-act="frRetry">↻ Try again</button>':'<p class="blink">Loading your friends…</p>'}</div>`;
+  const gs=Object.values(HOF_GAMES);
+  const code=`<div class="fr-code"><small>YOUR FRIEND CODE</small><b>${esc(fmtCode(d.code))}</b><div class="row" style="justify-content:center;margin-top:4px"><button class="chip" data-act="frShare">📤 Share my code</button></div></div><p class="tiny" style="margin:6px 4px 0">Only give your code to friends you know in real life. They’ll see your first name, knight picture, stars and scores. There’s no chat.</p>`;
+  const add=`<h3 class="sub">Add a friend</h3><div class="fr-add"><input id="frCode" class="bigin" maxlength="9" autocomplete="off" autocapitalize="characters" spellcheck="false" placeholder="FRIEND CODE" aria-label="Your friend's code"><button class="btn mint" data-act="frAdd">Add ➕</button></div>`;
+  const inc=d.incoming.length?`<h3 class="sub">Friend requests 💌</h3><div class="fr-list">${d.incoming.map(f=>`<div class="fr-card">${friendCat(f.c)}<div class="who"><b>${esc(f.n)}</b><small>wants to be your friend</small></div><div class="acts"><button class="btn mint" style="padding:6px 14px;font-size:17px;min-height:44px" data-act="frYes" data-code="${esc(f.code)}" data-n="${esc(f.n)}">✓ Yes</button><button class="chip" data-act="frNo" data-code="${esc(f.code)}">No</button></div></div>`).join('')}</div>`:'';
+  const list=d.friends.length?d.friends.map(f=>friendRow(f,gs)).join(''):'<div class="notes"><p style="margin:0">No friends yet! Swap friend codes with someone you know, then type theirs above. ⚔️</p></div>';
+  const out=d.outgoing.length?`<h3 class="sub">Waiting for a yes ⏳</h3><div class="notes fr-wait">${d.outgoing.map(f=>`<span>${esc(f.n)} <button class="chip" style="min-height:32px;padding:0 10px;font-size:13px" data-act="frRemove" data-code="${esc(f.code)}" data-n="${esc(f.n)}" data-pending="1">cancel</button></span>`).join('<br>')}</div>`:'';
+  return head+code+add+inc+`<h3 class="sub">My friends (${d.friends.length})</h3><div class="fr-list">${list}</div>`+out;
+}
+async function frAdd(){
+  const i=$('#frCode');if(!i||UI.frAdding)return;const code=i.value.replace(/[^A-Za-z0-9]/g,'').toUpperCase();
+  if(code.length!==6){shakeEl(i);sfx.wrong();return toast('<span class="ti">🤝</span><div>Friend codes have 6 letters and numbers. Check it and try again!</div>')}
+  UI.frAdding=true;sfx.tap();
+  try{const r=await rpc('wa_friend_add',frArgs({p_code:code}));
+    if(r&&r.ok){const j=$('#frCode');if(j)j.value='';
+      if(r.state==='accepted'){sfx.chest();confetti(40);toast(`<span class="ti">🎉</span><div><b>${r.already?`You are already friends with ${esc(r.n)}!`:`You and ${esc(r.n)} are friends!`}</b></div>`)}
+      else toast(`<span class="ti">💌</span><div><b>${r.already?`You already asked ${esc(r.n)}.`:`Request sent to ${esc(r.n)}!`}</b><br>They need to say yes.</div>`)}
+    else{sfx.wrong();shakeEl(i);toast(`<span class="ti">🤝</span><div>${FR_ERR[r&&r.err]||'Something went wrong. Try again!'}</div>`)}
+  }catch(e){toast(FR_NET)}
+  UI.frAdding=false;UI.frBusy=false;await friendsLoad();
+}
+async function frAnswer(code,yes,n){
+  try{const r=await rpc('wa_friend_answer',frArgs({p_code:code,p_accept:yes}));
+    if(r&&r.ok&&yes){sfx.chest();confetti(30);toast(`<span class="ti">🎉</span><div><b>${esc(n||'Your new friend')} is your friend now!</b></div>`)}
+    else if(r&&!r.ok)toast(`<span class="ti">🤝</span><div>${FR_ERR[r.err]||'That request is gone.'}</div>`)}
+  catch(e){toast(FR_NET)}
+  UI.frBusy=false;await friendsLoad();
+}
+async function frDoRemove(code){
+  try{await rpc('wa_friend_remove',frArgs({p_code:code}))}catch(e){toast(FR_NET)}
+  UI.frBusy=false;await friendsLoad();
+}
+async function frShare(){
+  const d=UI.fr;if(!d||!d.code)return;sfx.tap();
+  const url=/^https?:/.test(location.protocol)?location.origin+location.pathname:'';
+  const text=`Join me on Warrior Academy! My friend code is ${fmtCode(d.code)}`;
+  try{if(navigator.share){await navigator.share(url?{text,url}:{text});return}}catch(e){if(e&&e.name==='AbortError')return}
+  try{await navigator.clipboard.writeText(url?text+' '+url:text);toast('<span class="ti">📋</span><div><b>Copied!</b><br>Paste it to your friend.</div>')}
+  catch(e){modal(`<h2>Your friend code</h2><div class="fr-code"><b>${esc(fmtCode(d.code))}</b></div><button class="btn" data-act="close" style="margin-top:10px">OK</button>`)}
+}
+async function frOff(off){ // change it on the server FIRST: switching off must really reach everyone
+  try{const r=await rpc('wa_friend_off',frArgs({p_off:off}));if(!(r&&r.ok))throw 0;
+    S.settings.friendsOff=off;save();UI.fr=null;UI.frErr='';render();
+    toast(`<span class="ti">🤝</span><div>${off?`Friends are off for ${esc(firstName(S.name))}.`:`Friends are on for ${esc(firstName(S.name))}.`}</div>`);
+    if(!off)friendsLoad()}
+  catch(e){toast('<span class="ti">☁️</span><div>No internet right now, so nothing changed. Try again soon.</div>')}
+}
+async function frNewCode(){
+  closeModal();
+  try{const r=await rpc('wa_friend_me',frArgs({p_reset:true}));if(!(r&&r.ok))throw 0;if(UI.fr)UI.fr.code=r.code;
+    toast(`<span class="ti">🔁</span><div><b>New friend code</b><br>${esc(fmtCode(r.code))}. The old one no longer works.</div>`)}
+  catch(e){toast(FR_NET)}
+}
+setInterval(()=>{if(document.hidden||!friendsOn()||UI.screen==='play')return;if(UI.tab==='friends'||Date.now()-(UI.frAt||0)>300000)friendsLoad()},60000);
+document.addEventListener('visibilitychange',()=>{if(!document.hidden&&friendsOn()&&UI.screen!=='play'&&Date.now()-(UI.frAt||0)>20000)friendsLoad()});
+
 /* ---------------- daily gift & streak ---------------- */
 function checkDaily(){
   const t=dayKey();if(!S.name||S.giftDay===t||needsSetup())return;
@@ -3130,7 +3248,7 @@ async function cloudJoin(){
 
 /* ---------------- actions ---------------- */
 const ACT={
-  tab:d=>{UI.tab=d.tab;UI.screen='home';sfx.tap();render();scrollTo(0,0)},
+  tab:d=>{UI.tab=d.tab;UI.screen='home';sfx.tap();render();scrollTo(0,0);if(d.tab==='friends')friendsLoad()},
   realm:d=>{const L=realmList(),p=Math.max(0,L.indexOf(UI.realm));UI.realm=L[Math.max(0,Math.min(L.length-1,p+Number(d.d)))];sfx.tap();render()},
   realmGo:d=>{UI.realm=Number(d.r);sfx.tap();render()},
   start:d=>{sfx.tap();startLevel(Number(d.r),Number(d.l))},
@@ -3207,6 +3325,17 @@ const ACT={
   tbQuit:()=>{if(TB&&TB.run)tbEnd('quit');else tbClose()},
   tbDone:()=>tbClose(),
   hof:d=>openBoard(d.p,d.g),
+  frAdd:()=>frAdd(),
+  frYes:d=>frAnswer(d.code,true,d.n),
+  frNo:d=>frAnswer(d.code,false),
+  frRetry:()=>{UI.frErr='';UI.frBusy=false;friendsRender();friendsLoad()},
+  frShare:()=>frShare(),
+  frRemove:d=>{if(d.pending==='1')return frDoRemove(d.code);
+    modal(`<h2>Remove ${esc(d.n)}?</h2><p>You won’t be in each other’s friends lists any more. You can add each other again with friend codes.</p><div class="row" style="margin-top:12px"><button class="btn mint" data-act="close">Keep friend</button><button class="btn ghost" data-act="frRemoveYes" data-code="${esc(d.code)}">Remove</button></div>`)},
+  frRemoveYes:d=>{closeModal();frDoRemove(d.code)},
+  frOff:d=>frOff(d.v==='1'),
+  frNewCode:()=>modal(`<h2>Make a new friend code?</h2><p>The old code stops working, so nobody can use it to send ${esc(firstName(S.name))} a request. Friends you already have stay friends.</p><div class="row" style="margin-top:12px"><button class="btn mint" data-act="close">Keep it</button><button class="btn ghost" data-act="frNewCodeYes">Make new code</button></div>`),
+  frNewCodeYes:()=>frNewCode(),
   blade:()=>{sfx.tap();startBlade()},
   hbGo:()=>hbGo(),
   hbQuit:()=>{if(HS&&HS.run)hbEnd('quit');else hbClose()},
@@ -3231,6 +3360,7 @@ document.addEventListener('keydown',e=>{
   if(UI.pin&&!$('#overlay')&&(!S.name||needsSetup()||UI.pin.ctx==='change')){if(/^[0-9]$/.test(e.key)){e.preventDefault();pinKey(e.key)}else if(e.key==='Backspace'){e.preventDefault();pinKey('del')}return}
   if(!S.name){if(e.key==='Enter'){const b=document.querySelector('[data-primary]');if(b){e.preventDefault();b.click()}}return}
   if(e.target&&e.target.id==='chAns'&&e.key==='Enter'){ACT.chCheck();return}
+  if(e.target&&e.target.id==='frCode'&&e.key==='Enter'){frAdd();return}
   if(UI.screen!=='play'||!P||$('#overlay')||$('#scratch'))return;
   if(e.key==='.'||e.key===','){press('.');return}
   if(/^[0-9]$/.test(e.key)){if(P.mc||(P.qs[P.i]&&P.qs[P.i].mc)){const bs=[...document.querySelectorAll('.choice')],b=bs[Number(e.key)-1];if(b&&!b.disabled)b.click()}else press(e.key)}
@@ -3289,7 +3419,7 @@ function countPlay(){
   UI.realm=pickStartRealm();
   let synced=false;
   if(S.name&&needsSetup()&&S.cloud){app.innerHTML='<div class="onb"><p class="lead">Loading your game… ⚔️</p></div>';try{await Promise.race([cloudSync(),new Promise(r=>setTimeout(r,4000))]);synced=true}catch(e){}UI.realm=pickStartRealm()}
-  render();if(S.name){if(!needsSetup())setTimeout(checkDaily,500);if(!synced)cloudSync()}
+  render();if(S.name){if(!needsSetup()){setTimeout(checkDaily,500);setTimeout(()=>{if(friendsOn())friendsLoad()},1800)}if(!synced)cloudSync()}
   countPlay();
 })();
 </script>
