@@ -639,6 +639,18 @@ button.me{cursor:pointer}
 .blink{animation:hofBlink 1s steps(2) infinite}
 @keyframes hofBlink{50%{opacity:.25}}
 .hof-close{margin-top:12px;font-family:inherit}
+
+/* Practice records stay readable on narrow phones. */
+.practice-table{display:flex;flex-direction:column;gap:5px;min-width:0}
+.practice-table .hofbtn{margin:0;font-size:15px;min-height:36px}
+.practice-best{font-size:13px;color:var(--muted)}
+.hof-picker{display:block;text-align:left;font-size:12px;color:#7fe8ff;margin:12px 0}
+.hof-picker select{display:block;width:100%;margin-top:6px;padding:10px;border:2px solid #7fe8ff;border-radius:10px;background:#221a4d;color:#fff;font:700 16px system-ui;text-transform:none}
+.hof .hof-help{font-size:12px;color:#bcb4dd;line-height:1.5;text-transform:none;margin:8px 0 12px}
+.hof-personal{border-top:1px solid #635b8b;margin-top:12px;padding-top:10px;font-size:12px;line-height:1.6;color:#bcb4dd;text-transform:none}
+.practice-result{margin:10px 0;font-size:15px}
+@media(max-width:480px){.pcard{flex-wrap:wrap;gap:8px}.pcard .grow{min-width:140px}.hof-title{font-size:22px}.hof-row{gap:4px;padding:5px}.hof-score{font-size:18px}.hof-who b{font-size:16px}}
+
 /* friends */
 .fr-code{text-align:center;background:#fff;border-radius:22px;padding:12px 14px;box-shadow:var(--shadow)}
 .fr-code small{display:block;font-weight:800;color:var(--muted);letter-spacing:1px}
@@ -1276,6 +1288,7 @@ function mergeFrom(c){ // combine progress from two devices: nothing earned on e
   S.fullTables=[...new Set([...(S.fullTables||[]),...(c.fullTables||[])])];S.owned=[...new Set([...(S.owned||[]),...(c.owned||[])])];S.badges=[...new Set([...(S.badges||[]),...(c.badges||[])])];
   const seen=new Set(S.drawings.map(d=>d.img));S.drawings=S.drawings.concat((c.drawings||[]).filter(d=>!seen.has(d.img))).slice(0,40);
   S.stats=mx(S.stats,c.stats);
+  mergePracticeRecords(c.practiceScores);
   if(!S.pinHash&&c.pinHash)S.pinHash=c.pinHash;if(!S.age&&c.age)S.age=c.age;
   if(c.streak&&(c.streak.count||0)>(S.streak.count||0))S.streak=c.streak;
   for(const k of['giftDay','drawDay','challengeDay'])if((c[k]||'')>(S[k]||''))S[k]=c[k];
@@ -1302,7 +1315,7 @@ async function cloudPush(){
       const t=Math.max(Date.now(),base+1);S.savedAt=t;
       r=await cloudSave(t,base);
     }
-    if(r&&r.ok){S.syncedAt=r.saved_at;S.baseYarn=S.yarn;persistLocal();setCloud('ok')}
+    if(r&&r.ok){S.syncedAt=r.saved_at;S.baseYarn=S.yarn;persistLocal();setCloud('ok');practiceBoardFlush()}
     else if(r&&(r.status==='bad'||r.status==='locked'))cloudDenied(r.status);
     else setCloud('ok');
   }catch(e){setCloud('off')}
@@ -3313,12 +3326,12 @@ function practiceView(){
   const due=dueFacts().length,seen=Object.keys(S.facts).length;
   const gtxt=seen<5?'Play a few levels and your forge will fire up!':due?`${due} fact${due>1?'s are':' is'} ready to sharpen. Reviewing at just the right time locks facts into your memory!`:'Every blade is sharp for now. Extra practice still earns gold!';
   const dojo=`<div class="pcard col"><div class="row" style="justify-content:flex-start"><div class="pi">✖️</div><div class="grow"><h3>Times Table Arena</h3><p>Pick a table to train. Each crystal glows brighter as you remember more of that table over different days.</p></div></div>
-  <div class="tables">${range(2,12).map(t=>{const p=crystalLvl(t);return `<button class="tbtn" data-act="table" data-t="${t}">×${t}<small>${Math.round(p*100)}% glowing</small><span class="minibar"><i style="width:${p*100}%"></i></span></button>`}).join('')}</div></div>`;
-  const garden=`<div class="pcard"><div class="pi">🔥</div><div class="grow"><h3>Review Forge</h3><p>${gtxt}</p></div><button class="btn mint" data-act="garden" ${seen<5?'disabled':''}>Forge</button></div>`;
-  const light=`<div class="pcard"><div class="pi">⚡</div><div class="grow"><h3>Lightning Round</h3><p>60 seconds of times tables. Your best: <b>${S.stats.lightningBest}</b></p></div><button class="btn sun" data-act="lightning">Go!</button></div>`;
-  const quick=(k,i,t,p)=>`<div class="pcard"><div class="pi">${i}</div><div class="grow"><h3>${t}</h3><p>${p}</p></div><button class="btn" data-act="quick" data-k="${k}">Play</button></div>`;
+  <div class="tables">${range(2,12).map(t=>{const p=crystalLvl(t);return `<div class="practice-table"><button class="tbtn" data-act="table" data-t="${t}">×${t}<small>${Math.round(p*100)}% glowing</small><span class="minibar"><i style="width:${p*100}%"></i></span></button>${practiceHofButton('table'+t)}</div>`}).join('')}</div></div>`;
+  const garden=`<div class="pcard"><div class="pi">🔥</div><div class="grow"><h3>Review Forge</h3><p>${gtxt}</p></div>${practiceBest('garden')}${practiceHofButton('garden')}<button class="btn mint" data-act="garden" ${seen<5?'disabled':''}>Forge</button></div>`;
+  const light=`<div class="pcard"><div class="pi">⚡</div><div class="grow"><h3>Lightning Round</h3><p>60 seconds of times tables. Your best: <b>${S.stats.lightningBest}</b></p></div>${practiceHofButton('lightning')}<button class="btn sun" data-act="lightning">Go!</button></div>`;
+  const quick=(k,i,t,p)=>`<div class="pcard"><div class="pi">${i}</div><div class="grow"><h3>${t}</h3><p>${p}</p></div>${practiceBest('quick_'+k)}${practiceHofButton('quick_'+k)}<button class="btn" data-act="quick" data-k="${k}">Play</button></div>`;
   const ddojo=`<div class="pcard col"><div class="row" style="justify-content:flex-start"><div class="pi">➗</div><div class="grow"><h3>Division Arena</h3><p>Train sharing facts. Each one is a times-table fact turned around!</p></div></div>
-  <div class="tables">${range(2,12).map(t=>{const k=divStrong(t);return `<button class="tbtn" data-act="dtable" data-t="${t}">÷${t}<small>${k}/12 strong</small><span class="minibar"><i style="width:${k/12*100}%"></i></span></button>`}).join('')}</div></div>`;
+  <div class="tables">${range(2,12).map(t=>{const k=divStrong(t);return `<div class="practice-table"><button class="tbtn" data-act="dtable" data-t="${t}">÷${t}<small>${k}/12 strong</small><span class="minibar"><i style="width:${k/12*100}%"></i></span></button>${practiceHofButton('dtable'+t)}</div>`}).join('')}</div></div>`;
   const blade=`<div class="pcard"><div class="pi">⚔️</div><div class="grow"><h3>Halving Blade</h3><p>Slice falling numbers in half: 7 → 3.5 + 3.5. Your best: <b>${bonusState().hbBest}</b></p></div><button class="chip hofbtn" data-act="hof" data-g="blade" aria-label="Hall of Fame">🏆</button><button class="btn sun" data-act="blade">Play</button></div>`;
   const skills='<h3 class="sub">Maths skills for Years 4 to 6</h3>'+
     quick('place','⛰️','Place value & rounding','Thousands, expanded form, words and rounding to 10 and 100.')+
@@ -3331,7 +3344,7 @@ function practiceView(){
     quick('ops','⚗️','Order of operations','Which part of a sum comes first, and brackets.')+
     quick('area','🧱','Area & perimeter','Rectangles and L-shapes.');
   const warm='<h3 class="sub">Warm-ups (optional)</h3>'+quick('add20','🌸','Adding to 20','A gentle warm-up. Never needed to open any map.')+quick('sub20','❄️','Taking away to 20','A gentle warm-up. Never needed to open any map.');
-  return '<h2 class="sec">Training</h2>'+blade+dojo+ddojo+quick('dec','🥧','Decimals','Tenths, hundredths, money and comparing.')+quick('mixed4','🎪','All four mixed','+ − × ÷ and two-step stories.')+skills+garden+light+warm;
+  return '<h2 class="sec">Training</h2>'+practiceHallCard()+blade+dojo+ddojo+quick('dec','🥧','Decimals','Tenths, hundredths, money and comparing.')+quick('mixed4','🎪','All four mixed','+ − × ÷ and two-step stories.')+skills+garden+light+warm;
 }
 
 
@@ -3497,7 +3510,7 @@ function parentsView(){
    <p class="tiny" style="margin:2px 0 0">${BAND_LABEL[band()]}</p>
    <div class="row" style="justify-content:flex-start;margin-top:8px"><b>Secret code</b><span>🔐 ${S.pinHash?'set':'not set'}</span><button class="chip" data-act="pinChange">Change code</button></div>
    <div class="row" style="justify-content:flex-start;margin-top:8px"><b>Hall of Fame</b><button class="chip ${!S.settings.hideBoard?'on':''}" data-act="hofHide" data-v="0">Show ${esc(firstName(S.name))}</button><button class="chip ${S.settings.hideBoard?'on':''}" data-act="hofHide" data-v="1">Hide</button><button class="chip" data-act="hof">🏆 View</button></div>
-   <p class="tiny" style="margin:2px 0 0">The Hall of Fame boards (${Object.values(HOF_GAMES).map(g=>g.title).join(' and ')}) are seen by everyone who plays Warrior Academy. It only ever shows a <b>first name</b> (“${esc(firstName(S.name))}”), the knight picture, the warrior rank and the score. Hide takes ${esc(firstName(S.name))} off the board straight away and stops new scores being posted. ${S.cloud?'':'Only cloud-saved players appear on the boards.'}</p>
+   <p class="tiny" style="margin:2px 0 0">The Hall of Fame boards (all practice games and arcade games) are seen by everyone who plays Warrior Academy. It only ever shows a <b>first name</b> (“${esc(firstName(S.name))}”), the knight picture, the warrior rank and the score. Hide takes ${esc(firstName(S.name))} off the board straight away and stops new scores being posted. ${S.cloud?'':'Only cloud-saved players appear on the boards.'}</p>
    <div class="row" style="justify-content:flex-start;margin-top:8px"><b>Friends</b>${friendsReady()?`<button class="chip ${!S.settings.friendsOff?'on':''}" data-act="frOff" data-v="0">On</button><button class="chip ${S.settings.friendsOff?'on':''}" data-act="frOff" data-v="1">Off</button><button class="chip" data-act="frNewCode">🔁 New code</button>`:'<span>needs cloud save</span>'}</div>
    <p class="tiny" style="margin:2px 0 0">Friends are added by typing each other's friend code, and the other player has to say yes. Friends can see ${esc(firstName(S.name))}'s <b>first name</b>, knight picture, stars, day streak and best arcade scores. <b>There is no chat or messaging.</b> Off hides ${esc(firstName(S.name))} from every friends list and stops new requests. “New code” makes the old code stop working; existing friends stay.</p>
    <div class="row" style="justify-content:flex-start;margin-top:8px"><b>Cloud save</b><span>${S.cloud?`☁️ saved as <b>${esc(S.name)}</b>`:'📱 this device only'}</span>${S.cloud?'':'<button class="chip" data-act="cloudJoin">Save to cloud</button>'}</div>
@@ -3517,7 +3530,7 @@ function parentsView(){
    <li><b>Concrete → pictorial → abstract</b> (Singapore maths). Arrays, ten-frames, tenths bars and hundred squares show <i>why</i> the answer works.</li>
    <li><b>Strategies, not just memorising.</b> Make-10, doubles and near doubles, ×9 = ×10 − 1, ×4 = double double, ×7 = ×5 + ×2.</li>
    <li><b>Growth-mindset feedback</b> (Dweck). Praise is for effort, strategy and fixing mistakes, never "you're so clever". Mistakes are shown as how warriors get stronger.</li>
-   <li><b>No time pressure by default</b> (Boaler: timed tests drive maths anxiety). The Lightning Round is optional, and players only race their own best score.</li>
+   <li><b>No time pressure by default</b> (Boaler: timed tests drive maths anxiety). The Lightning Round is optional. Players can race their personal best and view shared high scores.</li>
    <li><b>Self-Determination Theory.</b> Autonomy (they pick the realm, table and gear), competence (stars, mastery bars) and relatedness (a named knight who cheers them on).</li>
    <li><b>Game loop, made kind.</b> Short 2–4 minute levels, 3-star ratings, a level map, combos, mystery gifts, a sticker collection and a daily gift. There are <b>no</b> lives in the maths, no losing, no ads and no purchases. A missed day is forgiven, and a break reminder pops up after a set time.</li>
    <li><b>Halving Blade, in Training any time.</b> Numbers from 1 to 100 fall down the screen and a swipe cuts one in half. Even numbers split into whole halves (8 → 4 + 4), odd numbers into decimals (7 → 3.5 + 3.5), and each half hops up and can be cut again (3.5 → 1.75 + 1.75), up to 4 cuts or 3 decimal places. Blacksmith orders ask for one exact half, so players work out halving chains like 25 → 12.5 → 6.25. A round lasts a minute. ${S.bonus&&S.bonus.hbPlays?`Played ${S.bonus.hbPlays} time${S.bonus.hbPlays>1?'s':''} so far, best score ${S.bonus.hbBest}.`:''}</li>
@@ -3558,7 +3571,7 @@ function newPlay(o){
   closeModal();closeScratch(true);if(P&&P.timer)clearInterval(P.timer);
   P=Object.assign({i:0,credits:[],combo:0,maxCombo:0,yarn:0,tries:0,hintUsed:false,hints:3,input:'',locked:false,joy:0,fixed:0,run:-1,mood:'normal',msg:pick(["Let's do this!","You've got this!",'Ready, warrior?','I believe in you!'])},o);
   if(band()==='little'){P.mc=true;P.visual=true}
-  P.n=P.qs.length;UI.screen='play';render();scrollTo(0,0);
+  P.n=P.qs.length;P.hofGame=practiceGameId(P.mode,P.qk,P.t);UI.screen='play';render();scrollTo(0,0);
 }
 function startLevel(r,l){
   const R=REALMS[r],L=R.levels[l];if(!levelUnlocked(r,l))return;
@@ -3802,16 +3815,17 @@ function useHint(){
 }
 function lightningSubmit(val,q){
   const a=$('#ans');P.locked=true;
-  if(same(val,q.ans)){P.score++;recordFact(q,true);checkCrystals(q);S.stats.answered++;S.stats.firstTry++;P.combo++;sfx.correct(Math.min(P.combo,12));
+  P.hofAttempts=(P.hofAttempts||0)+1;
+  if(same(val,q.ans)){P.score++;recordFact(q,true);checkCrystals(q);S.stats.answered++;S.stats.firstTry++;P.combo++;P.maxCombo=Math.max(P.maxCombo,P.combo);sfx.correct(Math.min(P.combo,12));
     if(a){a.classList.add('right');const r=a.getBoundingClientRect();burst(r.left+r.width/2,r.top+r.height/2,['⚡','✨'],6)}
     setTimeout(lnext,220)}
   else{P.combo=0;sfx.wrong();recordFact(q,false);S.stats.answered++;if(a){a.textContent=q.ans;a.classList.add('reveal')}setTimeout(lnext,900)}
 }
 function lnext(){if(!P||P.mode!=='lightning'||!P.timer)return;P.qs.push(lightningQ());P.i++;P.input='';P.locked=false;P.tries=0;renderPlay()}
 function finishLightning(){
-  if(!P)return;const sc=P.score,pb=sc>S.stats.lightningBest;if(pb)S.stats.lightningBest=sc;S.yarn+=sc;if(sc>=10)badge('lightning');save();
+  if(!P||P.hofRecorded)return;recordPracticeRound();const sc=P.score,pb=sc>S.stats.lightningBest;if(pb)S.stats.lightningBest=sc;S.yarn+=sc;if(sc>=10)badge('lightning');save();
   sfx.finish();if(pb&&sc>0)confetti(70);
-  modal(`<h2>Time! ⚡</h2><div style="font-size:64px;font-weight:800;line-height:1">${sc}</div><p>${pb&&sc>0?'<b>New personal best!</b> 🎉':`Your best is <b>${S.stats.lightningBest}</b>. Every round makes your blade faster!`}</p><p>+${sc} 🪙</p><div class="row" style="margin-top:10px"><button class="btn sun" data-act="again">Again ↻</button><button class="btn ghost" data-act="toMap">Done</button></div>`);
+  modal(`<h2>Time! ⚡</h2><div style="font-size:64px;font-weight:800;line-height:1">${sc}</div><p>${pb&&sc>0?'<b>New personal best!</b> 🎉':`Your best is <b>${S.stats.lightningBest}</b>. Every round makes your blade faster!`}</p><p>+${sc} 🪙</p>${practiceResultHTML()}<div class="row" style="margin-top:10px"><button class="btn sun" data-act="again">Again ↻</button><button class="btn ghost" data-act="toMap">Done</button></div>`);
 }
 function growthMsg(sc,fixed){
   if(sc>=.99)return pick(['Every single one first try! All that practice is really paying off.','A perfect round! Your brain has really learned these.']);
@@ -3853,11 +3867,12 @@ function finishLevel(){
   REALMS.forEach((X,i)=>{if(!beforeUnl[i]&&realmUnlocked(i)&&realmList().includes(i))setTimeout(()=>toast(`<span class="ti">${X.icon}</span><div><b>New realm unlocked!</b><br>${X.name}</div>`),2600)});
 }
 function finishPractice(){
+  if(!P||P.hofRecorded)return;recordPracticeRound();
   const n=P.credits.length,sc=P.credits.reduce((a,b)=>a+b,0)/Math.max(1,n),right=P.credits.filter(c=>c===1).length;
   const bonus=10;S.yarn+=bonus;P.yarn+=bonus;const g=P.mode==='garden';if(g)badge('garden');save();
   modal(`<div class="lc"><div id="lcCat">${catHTML(cs(100),'happy')}</div><h2>${g?'Your blades are forged! ⚔️':P.mode==='quick'?'Practice done! 🎉':`${P.mode==='dtable'?'÷':'×'}${P.t} training done!`}</h2>${g?`<div class="bloom">${'⚔️'.repeat(Math.max(1,right))}</div>`:P.mode==='table'?`<p>×${P.t} facts that are strong: <b>${tableStrong(P.t)}/12</b></p>`:P.mode==='dtable'?`<p>÷${P.t} facts that are strong: <b>${divStrong(P.t)}/12</b></p>`:''}
    <div class="lcstats"><div><b>${right}/${n}</b><small>first try</small></div><div><b>${P.maxCombo}</b><small>best combo</small></div><div><b>+${P.yarn}</b><small>gold 🪙</small></div></div>
-   <p class="growth">${growthMsg(sc,P.fixed)}</p>
+   ${practiceResultHTML()}<p class="growth">${growthMsg(sc,P.fixed)}</p>
    ${g?`<div id="chestZone"><button class="chest" data-act="openChest" aria-label="Open mystery gift">🎁</button><div class="tiny">Blacksmiths get a gift too!</div></div>`:''}
    <div class="row" id="lcBtns" style="${g?'visibility:hidden;':''}margin-top:10px"><button class="btn" data-act="again">Again ↻</button><button class="btn ghost" data-act="toMap">Done</button></div>${passBanner()}${breakNudge()}</div>`);
   sfx.finish();startLcDance();if(sc>=.9)confetti(50);
@@ -4205,6 +4220,69 @@ document.addEventListener('visibilitychange',()=>{if(HS&&HS.run&&document.hidden
 const HOF_GAMES={
   siege:{key:'warrior:siege',name:'CATAPULT SIEGE',title:'Catapult Siege',best:()=>bonusState().best,how:'Beat a guardian, play Catapult Siege, and be the first!'},
   blade:{key:'warrior:blade',name:'HALVING BLADE',title:'Halving Blade',best:()=>bonusState().hbBest,how:'Play Halving Blade in Training and be the first!'}};
+/* Practice boards use accuracy, never speed, for untimed maths rounds.
+   Keys include the academy, age band and activity; original arcade keys stay unchanged. */
+const PRACTICE_BANDS={big:'Warrior training'};
+for(const [b,group] of Object.entries(PRACTICE_BANDS)){
+  const activities=b==='little'?['quick_count','quick_teens','quick_add10','quick_sub10','quick_share','quick_groups']:
+    b==='middle'?['quick_add20','quick_sub20','quick_div',...range(2,12).map(t=>'table'+t)]:
+    [...range(2,12).map(t=>'table'+t),...range(2,12).map(t=>'dtable'+t),'quick_dec','quick_mixed4',...NEW_REALM_IDS.map(id=>'quick_'+id),'quick_add20','quick_sub20'];
+  for(const activity of [...activities,'garden','lightning']){
+    const id=practiceId(activity,b),title=activity.startsWith('quick_')?QUICK[activity.slice(6)].t:
+      activity.startsWith('dtable')?'÷'+activity.slice(6)+' division':activity.startsWith('table')?'×'+activity.slice(5)+' times table':activity==='garden'?'Review Forge':'Lightning Round';
+    HOF_GAMES[id]={key:'warrior:'+b+':'+activity,title,name:title,group,accuracy:activity!=='lightning',
+      best:()=>practiceRecord(id).best||0,how:'Finish a round to join this board!'};
+  }
+}
+function practiceId(activity,b=band()){return 'practice_'+b+'_'+activity}
+function practiceGameId(mode,qk,t){
+  const activity=mode==='quick'?'quick_'+qk:mode==='table'?'table'+t:mode==='dtable'?'dtable'+t:mode;
+  const id=practiceId(activity);return HOF_GAMES[id]?id:null;
+}
+function practiceRecord(id){return S.practiceScores&&S.practiceScores[id]||{}}
+function practiceWeek(){const d=new Date();d.setUTCDate(d.getUTCDate()-(d.getUTCDay()+6)%7);return d.toISOString().slice(0,10)}
+function mergePracticeRecords(other){
+  if(!other||typeof other!=='object')return;S.practiceScores=S.practiceScores||{};
+  for(const [id,c] of Object.entries(other)){
+    if(!c||typeof c!=='object')continue;const r=S.practiceScores[id]||(S.practiceScores[id]={});
+    for(const k of ['best','plays','answered','firstTry','combo'])r[k]=Math.max(r[k]||0,c[k]||0);
+    if(c.pending&&(!r.pending||c.pending.week>r.pending.week||(c.pending.week===r.pending.week&&c.pending.score>r.pending.score)))r.pending={...c.pending};
+  }
+}
+function recordPracticeRound(){
+  if(!P||P.hofRecorded||!HOF_GAMES[P.hofGame])return;
+  if(P.mode!=='lightning'&&P.credits.length!==P.n)return; // Unfinished rounds never count.
+  P.hofRecorded=true;const id=P.hofGame,G=HOF_GAMES[id],right=P.mode==='lightning'?P.score:P.credits.filter(c=>c===1).length;
+  const total=P.mode==='lightning'?(P.hofAttempts||0):P.n,score=G.accuracy?Math.round(right/Math.max(1,total)*100):P.score;
+  S.practiceScores=S.practiceScores||{};const r=S.practiceScores[id]||(S.practiceScores[id]={});
+  r.best=Math.max(r.best||0,score);r.plays=(r.plays||0)+1;r.answered=(r.answered||0)+total;r.firstTry=(r.firstTry||0)+right;r.combo=Math.max(r.combo||0,P.maxCombo||0);
+  const week=practiceWeek();r.pending={week,score:Math.max(r.pending&&r.pending.week===week?r.pending.score:0,score)};
+  P.hofScore=score;save();practiceBoardFlush();
+}
+let practiceFlush=null;
+function practiceBoardFlush(){
+  if(practiceFlush)return practiceFlush;
+  if(!boardOn())return Promise.resolve();
+  const owner=boardName();
+  practiceFlush=(async()=>{
+    for(const [id,r] of Object.entries(S.practiceScores||{})){
+      if(boardName()!==owner||!boardOn())return;
+      if(!r.pending||!HOF_GAMES[id])continue;
+      const pending={...r.pending},weekly=pending.week===practiceWeek();
+      const bestResult=await boardSubmit(id,r.best,false);
+      if(boardName()!==owner||!boardOn())return;
+      const result=weekly?await boardSubmit(id,pending.score,true):bestResult;
+      if(bestResult&&bestResult.ok&&result&&result.ok&&r.pending&&r.pending.week===pending.week&&r.pending.score===pending.score){delete r.pending;persistLocal()}
+    }
+  })().finally(()=>{practiceFlush=null});return practiceFlush;
+}
+function hofScore(score,G){return G.accuracy?Math.max(0,Math.min(100,Number(score)||0))+'%':String(Number(score)||0).padStart(5,'0')}
+function practiceHofButton(activity){const id=practiceId(activity),G=HOF_GAMES[id];return G?`<button class="chip hofbtn" data-act="hof" data-g="${id}" aria-label="${esc(G.title)} Hall of Fame">🏆</button>`:''}
+function practiceBest(activity){const id=practiceId(activity),r=practiceRecord(id);return r.plays?`<span class="practice-best">Best: ${hofScore(r.best,HOF_GAMES[id])}</span>`:''}
+function practiceHallCard(){return `<div class="pcard"><div class="pi">🏆</div><div class="grow"><h3>Hall of Fame</h3><p>Every practice game. Every player. Browse weekly and all-time records!</p></div><button class="btn sun" data-act="hof" data-g="${practiceId('lightning')}">View</button></div>`}
+function practiceStatsHTML(id){const r=practiceRecord(id);return !r.plays?'':`<div class="hof-personal">Your practice: <b>${r.plays}</b> completed round${r.plays===1?'':'s'} · <b>${r.firstTry||0}/${r.answered||0}</b> first try · best combo <b>${r.combo||0}</b><br>Personal best: <b>${hofScore(r.best,HOF_GAMES[id])}</b>${r.pending?'<br>Your result is saved. It will post when cloud save is available.':''}</div>`}
+function practiceResultHTML(){if(!P||!P.hofRecorded)return '';const G=HOF_GAMES[P.hofGame];return `<div class="practice-result"><b>${G.accuracy?'First-try accuracy':'Round score'}: ${hofScore(P.hofScore,G)}</b><br><button class="chip" data-act="practiceHof" data-g="${P.hofGame}">🏆 Hall of Fame</button></div>`}
+
 function boardName(){return cloudName(S.name)}
 function firstName(n){const f=String(n||'').trim().split(/\s+/)[0]||'';return (f.charAt(0).toUpperCase()+f.slice(1).toLowerCase()).slice(0,12)}
 function boardOn(){return !!S.cloud&&!!S.pinHash&&!S.settings.hideBoard}
@@ -4220,24 +4298,26 @@ async function boardHide(h){S.settings.hideBoard=h;save();render();
   catch(e){toast('<span class="ti">☁️</span><div>No internet right now. Try again soon.</div>')}}
 const HOF_MED=['🥇','🥈','🥉'];
 function hofRows(top,G){if(!top.length)return `<div class="hof-empty">NO SCORES YET<br><small>${G.how}</small></div>`;
-  return '<ol class="hof-list">'+top.map((t,i)=>{const c=t.c||{};return `<li class="hof-row ${t.me?'me':''} p${i+1}"><span class="hof-pos">${HOF_MED[i]||(i+1)+'TH'}</span><span class="hof-cat">${catHTML(cs(50),'happy',{fur:FURS[c.f]?c.f:'ginger',equipped:c.e&&typeof c.e==='object'?c.e:{}})}</span><span class="hof-who"><b>${esc(t.n||'?')}</b><small>${esc(t.r||'warrior')}</small></span><span class="hof-score">${String(t.s||0).padStart(5,'0')}</span></li>`}).join('')+'</ol>'}
+  return '<ol class="hof-list">'+top.map((t,i)=>{const c=t.c||{};return `<li class="hof-row ${t.me?'me':''} p${i+1}"><span class="hof-pos">${HOF_MED[i]||(i+1)+'TH'}</span><span class="hof-cat">${catHTML(cs(50),'happy',{fur:FURS[c.f]?c.f:'ginger',equipped:c.e&&typeof c.e==='object'?c.e:{}})}</span><span class="hof-who"><b>${esc(t.n||'?')}</b><small>${esc(t.r||'warrior')}</small></span><span class="hof-score">${hofScore(t.s,G)}</span></li>`}).join('')+'</ol>'}
 async function openBoard(period,game){
   period=period||UI.hofTab||'all';game=HOF_GAMES[game]?game:HOF_GAMES[UI.hofGame]?UI.hofGame:Object.keys(HOF_GAMES)[0];UI.hofTab=period;UI.hofGame=game;sfx.tap();
   const G=HOF_GAMES[game];
-  const games=`<div class="hof-tabs">${Object.keys(HOF_GAMES).map(g=>`<button class="${g===game?'on':''}" data-act="hof" data-g="${g}" data-p="${period}">${HOF_GAMES[g].name}</button>`).join('')}</div>`;
+  const groups=[...new Set(Object.values(HOF_GAMES).map(g=>g.group||'Arcade'))];
+  const games=`<label class="hof-picker">Choose a game<select id="hofGameSel">${groups.map(group=>`<optgroup label="${esc(group)}">${Object.entries(HOF_GAMES).filter(([,g])=>(g.group||'Arcade')===group).map(([id,g])=>`<option value="${id}" ${id===game?'selected':''}>${esc(g.title)}</option>`).join('')}</optgroup>`).join('')}</select></label>`;
   const tabs=`<div class="hof-tabs"><button class="${period==='all'?'on':''}" data-act="hof" data-p="all" data-g="${game}">ALL-TIME</button><button class="${period==='week'?'on':''}" data-act="hof" data-p="week" data-g="${game}">THIS WEEK</button></div>`;
-  const shell=body=>`<div class="hof"><div class="hof-title">🏆 HALL OF FAME 🏆</div><div class="hof-sub">${G.name} · HIGH SCORES</div>${games}${tabs}${body}<button class="btn ghost hof-close" data-act="close">Close</button></div>`;
+  const shell=body=>`<div class="hof"><div class="hof-title">🏆 HALL OF FAME 🏆</div><div class="hof-sub">${G.group?G.group+' · ':''}${G.name} · ${G.accuracy?'FIRST-TRY ACCURACY':'HIGH SCORES'}</div>${games}${tabs}<p class="hof-help">${G.accuracy?'Completed rounds • best first-try percentage wins • no speed bonus':'Best score wins'}. Shared with all players.</p>${body}<button class="btn ghost hof-close" data-act="close">Close</button></div>`;
   modal(shell('<div class="hof-empty blink">LOADING…</div>'));const m=$('#overlay .modal');if(m)m.classList.add('hofm');
-  UI.hofSynced=UI.hofSynced||{};if(boardOn()&&G.best()&&!UI.hofSynced[game]){UI.hofSynced[game]=true;await boardSubmit(game,G.best(),false)}
+  await Promise.race([practiceBoardFlush(),new Promise(resolve=>setTimeout(resolve,2500))]);
+  UI.hofSynced=UI.hofSynced||{};if(boardOn()&&G.best()&&!UI.hofSynced[game]){const r=await boardSubmit(game,G.best(),false);if(r&&r.ok)UI.hofSynced[game]=true}
   let d=null;try{d=await rpc('wa_board',{p_period:period,p_name:boardName(),p_game:G.key})}catch(e){}
   if(!$('#overlay .hof')||UI.hofTab!==period||UI.hofGame!==game)return;
   let me='';
   if(!d)me='<div class="hof-me">NO INTERNET. TRY AGAIN SOON!</div>';
   else if(S.settings.hideBoard||(d.me&&d.me.hidden))me=`<div class="hof-me">${esc(firstName(S.name))} IS HIDDEN FROM THE BOARD<br><small>A grown-up can change this in ⚙️ Grown-ups corner</small></div>`;
   else if(!S.cloud)me='<div class="hof-me">TURN ON CLOUD SAVE TO JOIN THE BOARD</div>';
-  else if(d.me&&d.me.s>0&&!(d.top||[]).some(t=>t.me))me=`<div class="hof-me">YOU: #${d.me.rank} · ${String(d.me.s).padStart(5,'0')}</div>`;
+  else if(d.me&&d.me.s>0&&!(d.top||[]).some(t=>t.me))me=`<div class="hof-me">YOU: #${d.me.rank} · ${hofScore(d.me.s,G)}</div>`;
   else if(!(d.me&&d.me.s>0))me=`<div class="hof-me blink">★ ${period==='week'?'NO SCORE THIS WEEK YET':`PLAY ${G.name} TO GET ON THE BOARD`} ★</div>`;
-  const ov=$('#overlay .modal');if(ov)ov.innerHTML=shell((d?hofRows(d.top||[],G):'')+me);
+  const ov=$('#overlay .modal');if(ov)ov.innerHTML=shell((d?hofRows(d.top||[],G):'')+me+practiceStatsHTML(game));
 }
 
 /* ---------------- Friends ----------------
@@ -4570,6 +4650,7 @@ const ACT={
   tbQuit:()=>{if(TB&&TB.run)tbEnd('quit');else tbClose()},
   tbDone:()=>tbClose(),
   hof:d=>openBoard(d.p,d.g),
+  practiceHof:d=>{endPlay();UI.tab='practice';render();openBoard(null,d.g)},
   frAdd:()=>frAdd(),
   frYes:d=>frAnswer(d.code,true,d.n),
   frNo:d=>frAnswer(d.code,false),
@@ -4622,6 +4703,7 @@ document.addEventListener('visibilitychange',()=>{if(!AC)return;if(document.hidd
 let lastSC=SC();
 addEventListener('resize',()=>{clearTimeout(UI.rsT);UI.rsT=setTimeout(()=>{const v=SC();if(v===lastSC)return;lastSC=v;const ae=document.activeElement;if(ae&&ae.tagName==='INPUT')return;if($('#scratch'))return;if(UI.tab==='draw'&&studio&&UI.screen!=='play')UI.draft=studio.cv.toDataURL();render()},250)});
 try{if('speechSynthesis' in window)speechSynthesis.addEventListener('voiceschanged',()=>{if(VOICE===undefined)resolveVoice();const sel=$('#voiceSel');if(sel&&!sel.matches(':focus'))sel.innerHTML=voiceOptions()})}catch(e){}
+document.addEventListener('change',e=>{if(e.target&&e.target.id==='hofGameSel')openBoard(UI.hofTab,e.target.value)});
 document.addEventListener('change',e=>{if(e.target&&e.target.id==='voiceSel'){try{localStorage.setItem(VOICE_KEY,e.target.value)}catch(_){}VOICE=undefined;speak(`Hi! I'm ${catName()}. What is 3 plus 4?`)}});
 
 /* offline play: a service worker keeps the last copy of the game (only when served over http/https; a double-clicked file:// page has none) */
