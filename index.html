@@ -623,7 +623,6 @@ button.me{cursor:pointer}
   .play .vis svg{max-height:34vh;width:auto}
 }
 
-
 /* short phones held upright (SE, older Androids): tighten the play screen so the answer buttons are still on screen */
 @media (orientation:portrait) and (max-height:700px){
   .play{gap:6px}
@@ -637,7 +636,6 @@ button.me{cursor:pointer}
   .keypad button{height:46px;font-size:26px}
   .hint,.explain{font-size:16px;padding:8px 10px}
 }
-
 /* Halving Slice */
 #blade{position:fixed;inset:0;z-index:60;background:linear-gradient(180deg,#18294a 0%,#325190 55%,#627cb0 100%);touch-action:none;user-select:none;-webkit-user-select:none;overflow:hidden;display:flex;flex-direction:column}
 .hb-sky{position:absolute;inset:0;pointer-events:none}
@@ -684,8 +682,8 @@ button.me{cursor:pointer}
 .practice-best{font-size:13px;color:var(--muted)}
 .hof-picker{display:block;text-align:left;font-size:12px;color:#7fe8ff;margin:12px 0}
 .hof-picker select{display:block;width:100%;margin-top:6px;padding:10px;border:2px solid #7fe8ff;border-radius:10px;background:#221a4d;color:#fff;font:700 16px system-ui;text-transform:none}
-.hof .hof-help{font-size:12px;color:#bcb4dd;line-height:1.5;text-transform:none;margin:8px 0 12px}
-.hof-personal{border-top:1px solid #635b8b;margin-top:12px;padding-top:10px;font-size:12px;line-height:1.6;color:#bcb4dd;text-transform:none}
+.hof .hof-help{font-size:12px;color:#b4c2dd;line-height:1.5;text-transform:none;margin:8px 0 12px}
+.hof-personal{border-top:1px solid #5b6b8b;margin-top:12px;padding-top:10px;font-size:12px;line-height:1.6;color:#b4c2dd;text-transform:none}
 .practice-result{margin:10px 0;font-size:15px}
 @media(max-width:480px){.pcard{flex-wrap:wrap;gap:8px}.pcard .grow{min-width:140px}.hof-title{font-size:22px}.hof-row{gap:4px;padding:5px}.hof-score{font-size:18px}.hof-who b{font-size:16px}}
 
@@ -993,8 +991,8 @@ function parseDay(k){const [y,m,d]=k.split('-').map(Number);return new Date(y,m-
 function addDays(k,n){const d=parseDay(k);d.setDate(d.getDate()+n);return dayKey(d)}
 function daysBetween(a,b){return Math.round((parseDay(b)-parseDay(a))/86400000)}
 const range=(a,b)=>Array.from({length:b-a+1},(_,i)=>a+i);
-function SC(){if(innerHeight<520)return 1; // a phone held sideways is wide but short: no bigger pictures
-  const w=innerWidth,sm=Math.min(screen.width||w,screen.height||w);return (w>=700&&sm>=700)?1.5:w>=500?1.2:1}
+function SC(){const w=innerWidth,sm=Math.min(screen.width||w,screen.height||w);if(innerHeight<520)return 1; // a phone held sideways is wide but short: no bigger pictures
+  return (w>=700&&sm>=700)?1.5:w>=500?1.2:1}
 const cs=n=>Math.round(n*SC());
 const sessionStart=Date.now();
 
@@ -3675,6 +3673,8 @@ function startLightning(){
   P.timer=setInterval(()=>{if(!P||P.mode!=='lightning')return;const left=P.end-Date.now(),tb=$('#tbar');if(tb)tb.style.width=Math.max(0,left/600)+'%';if(left<=0){clearInterval(P.timer);P.timer=null;finishLightning()}},100);
 }
 function comboText(){return P.combo>=2?`🔥 Combo ×${P.combo}`:''}
+/* what the knight says after a right answer (little band). For tap-the-picture questions q.ans is only the tapped option's POSITION (0,1,2…),
+   so never read it out: say the shape/solid name, or a plain cheer. Only real number answers are read as numbers. */
 const CHEERS=['Yes!','You got it!','Spot on!','Well done!','Purr-fect!'];
 function cheerSay(q){
   if(q.kind==='more')return `${q.ans} is more!`;
