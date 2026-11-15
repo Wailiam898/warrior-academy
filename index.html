@@ -553,9 +553,9 @@ button.me{cursor:pointer}
 @keyframes aDrumR{0%,100%{transform:rotate(4deg)}50%{transform:rotate(32deg)}}
 @keyframes aMagic{0%,100%{transform:rotate(0)}20%{transform:rotate(-150deg)}35%{transform:rotate(-118deg)}50%{transform:rotate(-160deg)}65%{transform:rotate(-118deg)}80%{transform:rotate(-150deg)}}
 @keyframes mvZoom{0%,100%{transform:translateX(0) rotate(0)}20%{transform:translateX(-28%) rotate(-6deg)}45%{transform:translateX(28%) rotate(6deg)}70%{transform:translateX(-18%) rotate(-4deg)}88%{transform:translateX(8%) rotate(2deg)}}
-@media (min-width:700px){.plates{font-size:44px}.tf i.x::after{font-size:22px}}
+@media (min-width:700px) and (min-height:520px){.plates{font-size:44px}.tf i.x::after{font-size:22px}}
 /* iPad / tablet: bigger everything */
-@media (min-width:700px){
+@media (min-width:700px) and (min-height:520px){
   :root{--d:15px}
   #app{max-width:860px;padding:18px 24px 132px}
   .sec{font-size:38px}.sub{font-size:24px}.tiny{font-size:16px}
@@ -594,10 +594,48 @@ button.me{cursor:pointer}
   .challenge .cht{font-size:24px}.colr{width:54px;height:54px}#cv{max-width:640px}
   .stage{padding:170px 0 20px}
 }
-@media (min-width:980px) and (orientation:landscape){
+@media (min-width:980px) and (min-height:520px) and (orientation:landscape){
   #app{max-width:1120px}
   .play-main{display:grid;grid-template-columns:1.15fr 1fr;gap:24px;align-items:start}
   .play-right{position:sticky;top:16px}
+}
+/* phone held sideways (wide but short): keep phone sizes (the iPad sizes above are skipped by min-height) and put the question
+   on the left and the answer buttons on the right, so the answers are on screen without scrolling */
+@media (orientation:landscape) and (max-height:519px){
+  #app{max-width:none;padding:8px max(14px,env(safe-area-inset-left)) 8px max(14px,env(safe-area-inset-right))}
+  .play{gap:6px}
+  .play-main{display:grid;grid-template-columns:1.1fr 1fr;gap:14px;align-items:start}
+  .play-right{position:sticky;top:6px}
+  .xbtn{width:38px;height:38px}
+  .coach{gap:6px}.coachcat{width:56px!important;height:auto!important}
+  .bubble.small{font-size:15px;padding:6px 10px}
+  .qcard{min-height:0;padding:8px 12px 10px;gap:4px;border-radius:22px}
+  .qtext{font-size:clamp(30px,8vh,44px)}.qtext.long{font-size:clamp(20px,6.2vh,28px)}
+  .hint,.explain{font-size:15px;padding:6px 10px}.exeq{font-size:26px}
+  .keypad{gap:6px}.keypad button{height:42px;font-size:24px;border-radius:14px}
+  .choices{gap:8px}.choice{height:56px;font-size:30px;border-radius:18px}
+  .choices.pics .choice{min-height:70px;padding:3px}.choices.pics .choice svg{max-height:62px}
+  .choices.txt .choice{min-height:50px;font-size:20px;padding:4px 8px}.choices.fr .choice{min-height:56px;font-size:26px}
+  .helpers{gap:6px}.chip{padding:4px 10px;font-size:14px}.chip.bigspeak{font-size:15px;padding:5px 12px}
+  .thinkbar{height:22px;margin-bottom:4px}.thinkbar span{font-size:13px}
+  .bossbar{padding:4px 10px}.gface{font-size:34px}
+  .modal{max-height:calc(100vh - 20px);overflow-y:auto}
+  .play .vis svg{max-height:34vh;width:auto}
+}
+
+
+/* short phones held upright (SE, older Androids): tighten the play screen so the answer buttons are still on screen */
+@media (orientation:portrait) and (max-height:700px){
+  .play{gap:6px}
+  .coachcat{width:64px!important;height:auto!important}
+  .bubble.small{font-size:15px;padding:6px 10px}
+  .qcard{min-height:0;padding:10px 12px 12px;gap:5px}
+  .qtext.long{font-size:clamp(21px,6.2vw,28px)}.qtext{font-size:clamp(36px,10vw,52px)}
+  .play .vis svg{max-height:22vh;width:auto}
+  .choice{height:64px;font-size:32px}.choices.pics .choice{min-height:84px}.choices.pics .choice svg{max-height:70px}
+  .choices.txt .choice{min-height:56px;font-size:22px}.choices.fr .choice{min-height:68px;font-size:30px}
+  .keypad button{height:46px;font-size:26px}
+  .hint,.explain{font-size:16px;padding:8px 10px}
 }
 
 /* Halving Slice */
@@ -615,7 +653,7 @@ button.me{cursor:pointer}
 .hb-demo b{display:inline-block;min-width:1.6em;background:#5583e0;color:#fff;border-radius:99px;padding:0 8px}
 .hb-demo b:nth-of-type(n+2){background:#2f9e68}
 .pcard .hofbtn{flex:none}
-@media (min-width:700px){.hb-order{font-size:22px}.hb-order b{font-size:32px}}
+@media (min-width:700px) and (min-height:520px){.hb-order{font-size:22px}.hb-order b{font-size:32px}}
 /* Hall of Fame: old-school arcade high-score table */
 .modal.hofm{background:#120d2e;color:#fff;border:4px solid #ffc43d;box-shadow:0 0 0 4px #120d2e,0 0 30px #6f9fff,0 20px 60px rgba(0,0,0,.5)}
 .hof{font-family:"Courier New",ui-monospace,monospace;font-weight:900;text-transform:uppercase}
@@ -774,7 +812,7 @@ button.me{cursor:pointer}
 .frac i{display:none}
 .dnum{color:var(--pink-d)}
 .keypad .ok.wide{grid-column:1/-1}
-@media (min-width:700px){.dbar{grid-template-columns:repeat(10,34px)}.dbar i{height:40px}.dgrid{--g:21px}.counted::before{font-size:17px}}
+@media (min-width:700px) and (min-height:520px){.dbar{grid-template-columns:repeat(10,34px)}.dbar i{height:40px}.dgrid{--g:21px}.counted::before{font-size:17px}}
 
 /* new topics: shapes, place value, time and fractions */
 .s2,.s3,.clk,.fsvg{display:block;flex:none}
@@ -796,12 +834,12 @@ button.me{cursor:pointer}
 .choices.sm .choice{font-size:17px}
 .choices.fr .choice{height:auto;min-height:84px;font-size:34px}
 .tiny2{font-size:inherit;font-weight:700;line-height:1.15;display:block}
-.sw{display:inline-block;width:46px;height:46px;border-radius:50%;border:3px solid var(--ink)}
+.qsw{display:inline-block;width:46px;height:46px;border-radius:50%;border:3px solid var(--ink)}
 .fset{display:flex;flex-wrap:wrap;gap:8px;justify-content:center;align-items:center;font-size:24px;line-height:1.1}
 .fb{border:3px solid var(--ink);border-radius:14px;padding:6px 8px;background:#fff;max-width:240px;min-width:44px;text-align:center;overflow-wrap:anywhere}
 .fb.on{background:#ffe08a}.fb.on2{background:#c9f3e3}.fb.dash{border-style:dashed;background:rgba(255,255,255,.55)}
 .ghost{font-size:14px;color:var(--muted);font-weight:700}
-@media (min-width:700px){.choices.pics .choice svg{max-width:170px;max-height:140px}.choices.pics .choice{min-height:140px}.choices.txt .choice{font-size:34px;min-height:90px}.choices.sm .choice{font-size:22px}.choices.fr .choice{font-size:44px;min-height:112px}.shp .dot{width:34px;height:34px;margin:-17px 0 0 -17px}.sw{width:60px;height:60px}.bigemo{font-size:84px}.fset{font-size:30px}}
+@media (min-width:700px) and (min-height:520px){.choices.pics .choice svg{max-width:170px;max-height:140px}.choices.pics .choice{min-height:140px}.choices.txt .choice{font-size:34px;min-height:90px}.choices.sm .choice{font-size:22px}.choices.fr .choice{font-size:44px;min-height:112px}.shp .dot{width:34px;height:34px;margin:-17px 0 0 -17px}.qsw{width:60px;height:60px}.bigemo{font-size:84px}.fset{font-size:30px}}
 
 /* ---- Warrior Academy: knight rig, armoury, Halving Blade ---- */
 .title{font-family:'Cinzel Decorative','Baloo 2',serif;font-weight:900;letter-spacing:.01em}
@@ -823,7 +861,7 @@ button.me{cursor:pointer}
 .gthumb .e-happy,.gthumb .e-sleepy,.gthumb .e-heart,.gthumb .k-brows,.gthumb .m-grin,.gthumb .m-open,.gthumb .m-sad,.gthumb .k-thumb{display:none}
 .sw .gthumb{width:56px;height:56px}
 .sw{gap:0}
-@media (min-width:700px){.gthumb{width:96px;height:96px}.sw .gthumb{width:70px;height:70px}}
+@media (min-width:700px) and (min-height:520px){.gthumb{width:96px;height:96px}.sw .gthumb{width:70px;height:70px}}
 /* Halving Blade: Whisker's Halving Slice styles, night-castle sky */
 #blade{background:linear-gradient(180deg,#141b3d 0%,#2c3a7a 55%,#6b4f9e 100%)}
 .hb-demo{background:#eef4ff}
@@ -955,7 +993,8 @@ function parseDay(k){const [y,m,d]=k.split('-').map(Number);return new Date(y,m-
 function addDays(k,n){const d=parseDay(k);d.setDate(d.getDate()+n);return dayKey(d)}
 function daysBetween(a,b){return Math.round((parseDay(b)-parseDay(a))/86400000)}
 const range=(a,b)=>Array.from({length:b-a+1},(_,i)=>a+i);
-function SC(){const w=innerWidth,sm=Math.min(screen.width||w,screen.height||w);return (w>=700&&sm>=700)?1.5:w>=500?1.2:1}
+function SC(){if(innerHeight<520)return 1; // a phone held sideways is wide but short: no bigger pictures
+  const w=innerWidth,sm=Math.min(screen.width||w,screen.height||w);return (w>=700&&sm>=700)?1.5:w>=500?1.2:1}
 const cs=n=>Math.round(n*SC());
 const sessionStart=Date.now();
 
@@ -1961,7 +2000,7 @@ function clkHandsQ(){const h=rnd(1,12);
   if(Math.random()<.5){
     return mcq({kind:'clkhands',raw:{h,m:0,v:0},sig:h+'a',disp:'The <b>hour hand</b> is the short hand. Which colour is the short hand?',say:'The hour hand is the short hand. Which hand is the short hand, the pink one or the blue one?',
       vis:pvis(clockSVG(h,0),'The short hand shows the hour'),pic:true,h:'Look at the two hands. One is short and one is long. The short hand tells the hour.',ex:'The short hand is pink. It tells us the hour. The long blue hand tells us the minutes.',eqs:'short hand = hour'},
-      [{h:'<span class="sw" style="background:#6f9fff"></span>',t:'pink'},{h:'<span class="sw" style="background:#2b98d2"></span>',t:'blue'}],0,'pics')}
+      [{h:'<span class="qsw" style="background:#6f9fff"></span>',t:'pink'},{h:'<span class="qsw" style="background:#2b98d2"></span>',t:'blue'}],0,'pics')}
   return numA({kind:'clkhands',raw:{h,m:0,v:1},sig:h+'b',disp:'The short hand points to the number □',say:'Which number is the short hand pointing to?',vis:pvis(clockSVG(h,0),'The short hand shows the hour'),pic:true,
     h:'Find the short hand. Which number is it pointing at? That is the hour.',ex:`The short hand points to ${h}. The long hand points to 12, so it is ${h} o'clock.`,eqs:`${h} o'clock`},h,[h%12+1,(h+10)%12+1,(h+5)%12+1,(h+2)%12+1],false)}
 function clkWhereQ(){const half=Math.random()<.5,ans=half?6:12;
@@ -3120,7 +3159,7 @@ function visual(q,reveal){
     if(a%10===0&&b%10===0)return `<div class="vis"><div class="b10"><div class="grp ga">${'<i class="rod"></i>'.repeat((a-b)/10)}${'<i class="rod gone"></i>'.repeat(b/10)}</div></div><div class="cap">${a/10} tens take away ${b/10} tens</div></div>`;
     return '';
   }
-  if(q.kind==='count'){let h='';for(let i=0;i<q.ans;i+=5)h+='<div>'+range(i+1,Math.min(q.ans,i+5)).map(k=>`<span class="tc">${q.emo}${reveal?`<small>${k}</small>`:''}</span>`).join('')+'</div>';return `<div class="vis"><div class="cgrid" style="font-size:${cs(q.ans>10?34:46)}px">${h}</div></div>`}
+  if(q.kind==='count'){let h='';for(let i=0;i<q.ans;i+=5)h+='<div>'+range(i+1,Math.min(q.ans,i+5)).map(k=>`<span class="tc">${q.emo}${reveal?`<small>${k}</small>`:''}</span>`).join('')+'</div>';return `<div class="vis"><div class="cgrid" style="font-size:min(${cs(q.ans>10?34:46)}px,10.5vw)">${h}</div></div>`}
   if(q.kind==='next')return `<div class="vis"><div class="track">${range(1,q.ans>10?20:10).map(k=>`<b class="${k===q.n?'hl':''}${k===q.ans?(reveal?' hl':' q'):''}">${k===q.ans&&!reveal?'?':k}</b>`).join('')}</div></div>`;
   if(q.kind==='more')return `<div class="vis"><div class="morerows" style="font-size:${cs(28)}px"><div><b>${q.a}</b><span>${q.emo.repeat(q.a)}</span></div><div><b>${q.b}</b><span>${q.emo.repeat(q.b)}</span></div></div><div class="cap">The longer line has more!</div></div>`;
   if(q.kind==='picadd')return `<div class="vis"><div class="picadd" style="font-size:${cs(36)}px"><span>${pe(q.emo,q.a,'tc')}</span><b>+</b><span>${pe(q.emo,q.b,'tc')}</span></div><div class="cap">${reveal?`${range(1,q.ans).join(', ')}… ${q.ans} altogether!`:`${q.a} and ${q.b} more`}</div></div>`;
@@ -3636,6 +3675,12 @@ function startLightning(){
   P.timer=setInterval(()=>{if(!P||P.mode!=='lightning')return;const left=P.end-Date.now(),tb=$('#tbar');if(tb)tb.style.width=Math.max(0,left/600)+'%';if(left<=0){clearInterval(P.timer);P.timer=null;finishLightning()}},100);
 }
 function comboText(){return P.combo>=2?`🔥 Combo ×${P.combo}`:''}
+const CHEERS=['Yes!','You got it!','Spot on!','Well done!','Purr-fect!'];
+function cheerSay(q){
+  if(q.kind==='more')return `${q.ans} is more!`;
+  if(q.nk&&q.mc){const t=q.ansTxt,named=['shfind','shname','shodd','solname','solobj'].includes(q.kind)&&typeof t==='string'&&/^[a-z ]+$/i.test(t);
+    return named?`${t}!`:pick(CHEERS)}
+  return `${q.ans}!`}
 function ansShow(q){return q.ansTxt!=null?q.ansTxt:q.ans} // the answer as words when it is a shape, time or fraction
 function qDisplay(q){
   const slot=P.explaining?`<span class="ans reveal" id="ans">${ansShow(q)}</span>`:`<span class="ans" id="ans">${(P.input||'?').replace('-','−')}</span>`;
@@ -3767,7 +3812,7 @@ function submit(val){
     const gain=first?2+Math.min(4,Math.floor(P.combo/3)):1;P.yarn+=gain;S.yarn+=gain;
     if(P.boss)P.joy=Math.min(P.n,P.joy+1);
     let msg=STREAK_MSG[P.combo]||(P.tries>0||q.requeued?pick(["You fixed it! That's how brains grow 💪",'Great comeback — you kept trying!',"Nice — you didn't give up!"]):P.hintUsed?pick(['Using the clue was a smart move!','See? The trick works!']):pick(PRAISE));
-    if(little){if(first&&P.tapped){P.careful=(P.careful||0)+1;P.yarn++;S.yarn++;if(!STREAK_MSG[P.combo])msg='Careful counting! +1 bonus 🪙'}speak(q.kind==='more'?`${q.ans} is more!`:`${q.ans}!`)}
+    if(little){if(first&&P.tapped){P.careful=(P.careful||0)+1;P.yarn++;S.yarn++;if(!STREAK_MSG[P.combo])msg='Careful counting! +1 bonus 🪙'}speak(cheerSay(q))}
     setCoach(msg,'happy');
     if(ansEl){ansEl.textContent=ansShow(q);ansEl.classList.add('right')}
     card&&card.classList.add('popa');
