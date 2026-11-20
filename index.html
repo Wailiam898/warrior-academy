@@ -790,6 +790,9 @@ button.me{cursor:pointer}
 .thinkbar span{position:relative;font-weight:800;font-size:16px}
 @keyframes thinkfill{to{width:100%}}
 .choices.waiting .choice,#answers.guiding .choice{opacity:.45}
+.keypad.waiting{opacity:.45;pointer-events:none}
+#answers{position:relative}
+.thinkbar.over{position:absolute;left:4px;right:4px;top:4px;margin:0;z-index:3;box-shadow:0 2px 8px rgba(42,54,79,.25)}
 .chip.bigspeak{font-size:20px;padding:8px 18px;background:#fff3c4}
 /* decimals */
 .dbars{display:flex;flex-direction:column;gap:6px;align-items:center}
@@ -3009,10 +3012,11 @@ const medianOf=a=>{const s=[...a].sort((x,y)=>x-y),m=s.length>>1;return s.length
 
 /* spaced repetition: Leitner boxes per fact (days until next review) */
 const BOXDAYS=[0,1,2,4,7,14];
-function recordFact(q,good,ms){ // ms (optional): thinking time of a first-try right answer
+function recordFact(q,good,ms,guess){ // ms (optional): thinking time of a first-try right answer. guess: a quick right answer in a run of guesses proves nothing, so the fact does not move up
   if(!q||!q.key)return;const t=dayKey();
   const f=S.facts[q.key]||(S.facts[q.key]={box:0,due:t,seen:0,right:0,wrong:0,last:null});
   f.seen++;
+  if(good&&guess){f.right++;f.last=t;f.due=t;return}
   let slow=false;
   if(good&&typeof ms==="number"&&ms>=0&&ms<=QT_IGNORE_MS){
     const lim=slowLimit(q,!!(P&&(P.mc||q.mc)));
@@ -3564,6 +3568,7 @@ function parentsView(){
    <li><b>Spaced repetition.</b> Every fact sits in its own memory box. Facts answered correctly come back after 1, 2, 4, 7 then 14 days. Missed facts come back sooner. Due facts are mixed into levels and the Review Forge.</li>
    <li><b>Retrieval and interleaving.</b> Answers are typed from memory, not just picked. Older facts are mixed in with new ones, which builds longer-lasting memory than practising one table at a time.</li>
    <li><b>The right amount of challenge (~85% success).</b> Each realm starts with picture-supported multiple choice, then moves to recall. The first miss gives a clue. A second miss shows a worked picture explanation, and the same question comes back later in the level.</li>
+   <li><b>Guessing doesn't pay.</b> A wrong answer tapped in a hurry, before there was time to work it out, counts as a guess. It still gets the same help, but the buttons rest for a few seconds, the wrong choice is not crossed out, the retry earns a quarter of the credit and no gold. A quick <i>right</i> answer is only marked down in the middle of a run of guesses (two or more in a round). A level with a run of hurried wrong taps and under two stars still counts as played, so nobody gets stuck, but it gives no mystery gift or bonus-game pass; a careful replay earns both. In Lightning a wrong answer freezes the round for about 2 seconds (3 on a second miss in a row). Nothing is timed on screen and nobody is told off.</li>
    <li><b>Concrete → pictorial → abstract</b> (Singapore maths). Arrays, ten-frames, tenths bars and hundred squares show <i>why</i> the answer works.</li>
    <li><b>Strategies, not just memorising.</b> Make-10, doubles and near doubles, ×9 = ×10 − 1, ×4 = double double, ×7 = ×5 + ×2.</li>
    <li><b>Growth-mindset feedback</b> (Dweck). Praise is for effort, strategy and fixing mistakes, never "you're so clever". Mistakes are shown as how warriors get stronger.</li>
@@ -3720,18 +3725,27 @@ function renderPlay(){
   </div>`;
   const sk=P.i+(q.requeued?'r':'');
   P.tc=0;P.tgc=0;
-  if(P.qKey!==sk){P.qKey=sk;P.qt={t0:Date.now(),n:0,at:0,total:0};if(document.hidden)qtHidRel=qtHold();P.tapped=false;P.enabledAt=0;P.readyAt=little?Date.now()+(q.ans>5?2600:1800):0}
-  if(little&&!P.explaining&&!P.guiding){const left=(P.readyAt||0)-Date.now();if(left>150)holdChoices(left);else P.enabledAt=P.enabledAt||Date.now()}
+  if(P.qKey!==sk){P.qKey=sk;P.qt={t0:Date.now(),n:0,at:0,total:0};if(document.hidden)qtHidRel=qtHold();P.tapped=false;P.guessQ=false;P.holdMsg='';P.enabledAt=little?0:Date.now();P.readyAt=little?Date.now()+(q.ans>5?2600:1800)+Math.min(3,P.guessN||0)*800:0}
+  if(!P.explaining&&!P.guiding){const left=(P.readyAt||0)-Date.now();if(left>150)holdChoices(left,P.holdMsg);else if(little)P.enabledAt=P.enabledAt||Date.now()}
   if(readAloud()&&!P.explaining&&P.said!==sk){P.said=sk;speakQ(q)}
 }
 /* Little Paws: "look first" pause so the answer buttons can't be tapped before the picture is looked at */
-function holdChoices(ms){const box=$('#answers .choices');if(!box||!P)return;const tok=P.holdTok=(P.holdTok||0)+1,myP=P;
-  box.classList.add('waiting');box.querySelectorAll('.choice').forEach(b=>b.disabled=true);
-  box.insertAdjacentHTML('beforebegin',`<div class="thinkbar" id="thinkbar"><i style="animation-duration:${ms}ms"></i><span>👀 Look and count first!</span></div>`);
+function holdChoices(ms,msg){const box=$('#answers .choices')||$('#answers .keypad');if(!box||!P)return;const tok=P.holdTok=(P.holdTok||0)+1,myP=P,kp=box.classList.contains('keypad');
+  box.classList.add('waiting');if(kp)P.locked=true;else box.querySelectorAll('.choice').forEach(b=>b.disabled=true);
+  box.insertAdjacentHTML('beforebegin',`<div class="thinkbar${kp?' over':''}" id="thinkbar"><i style="animation-duration:${ms}ms"></i><span>${msg||'👀 Look and count first!'}</span></div>`);
   setTimeout(()=>{if(P===myP&&P.holdTok===tok)releaseChoices()},ms)}
-function releaseChoices(){if(!P)return;P.readyAt=0;P.holdTok=(P.holdTok||0)+1;const tb=$('#thinkbar');if(tb)tb.remove();
-  const box=$('#answers .choices');if(!box||!box.classList.contains('waiting'))return;
-  box.classList.remove('waiting');box.querySelectorAll('.choice:not(.wrongc)').forEach(b=>b.disabled=false);P.enabledAt=Date.now()}
+function releaseChoices(){if(!P)return;P.readyAt=0;P.holdMsg='';P.holdTok=(P.holdTok||0)+1;const tb=$('#thinkbar');if(tb)tb.remove();
+  const box=$('#answers .choices')||$('#answers .keypad');if(!box||!box.classList.contains('waiting'))return;
+  box.classList.remove('waiting');if(box.classList.contains('keypad')){if(!P.guiding&&!P.explaining)P.locked=false}else box.querySelectorAll('.choice:not(.wrongc)').forEach(b=>b.disabled=false);P.enabledAt=Date.now()}
+/* Guessing. A wrong answer tapped before there was time to work it out (and with no counting or clue first) is treated as a guess.
+   A guess gets the same teaching as any wrong answer, but it is not rewarded: the buttons rest for a few seconds, a wrong choice
+   that was tapped in a hurry stays in play (it is not crossed out to narrow the odds), the retry earns less credit and no gold,
+   and each guess makes the next "look first" pause a little longer. A quick RIGHT answer is only marked down in the middle of a
+   run of guesses (two or more so far this round). Nothing is shown as a timer and nobody is told off. */
+const GUESS_MS={mc:1500,key:2200},GUESS_PAUSE=3000;
+function attemptMs(){return P.enabledAt?Date.now()-P.enabledAt:1e9}  // how long this try has had the buttons (0 until they first come on)
+function isQuick(q){return !P.tapped&&!P.hintUsed&&attemptMs()<((P.mc||q.mc)?GUESS_MS.mc:GUESS_MS.key)}
+function guessHold(){if(!P)return;P.readyAt=Date.now()+GUESS_PAUSE;P.holdMsg='👀 Look again, then tap';holdChoices(GUESS_PAUSE,P.holdMsg)}
 /* tap a picture to count it out loud; tap a group to count in 2s/5s/10s */
 function tapCount(el){
   if(!P||UI.screen!=='play'||P.guiding||P.explaining||el.classList.contains('counted'))return;
@@ -3802,39 +3816,44 @@ function submit(val){
   const q=P.qs[P.i];P.lastAns=Date.now();if(P.mode==='lightning')return lightningSubmit(val,q);
   P.locked=true;const card=$('#qcard'),ansEl=$('#ans'),little=band()==='little';
   if(same(val,q.ans)){
-    const first=P.tries===0&&!P.hintUsed,credit=P.tries===0?(P.hintUsed?.5:1):.5;
-    if(!q.requeued)P.credits.push(credit);
-    recordFact(q,first,first&&band()!=='little'?qtMs():null);checkCrystals(q);S.stats.answered++;if(first)S.stats.firstTry++;
-    if(P.tries>0||q.requeued)P.fixed++;
-    P.combo=first?P.combo+1:0;P.maxCombo=Math.max(P.maxCombo,P.combo);S.stats.bestCombo=Math.max(S.stats.bestCombo,P.combo);
+    const first=P.tries===0&&!P.hintUsed,rq=!!q.requeued;
+    const lucky=first&&!rq&&(P.guessN||0)>=2&&isQuick(q);   // quick right answer in a run of guesses: probably another guess
+    const fl=first&&!lucky,good=fl&&!rq;                    // good = a first-try answer worth full gold and a combo step
+    if(fl&&!isQuick(q))P.guessN=Math.max(0,(P.guessN||0)-1); // a careful first-try answer eases the run of guesses off
+    const credit=P.tries===0?(P.hintUsed||lucky?.5:1):(P.guessQ?.25:.5);
+    if(!rq)P.credits.push(credit);
+    recordFact(q,first,first&&band()!=='little'?qtMs():null,lucky);checkCrystals(q);S.stats.answered++;if(fl)S.stats.firstTry++;
+    if(P.tries>0||rq)P.fixed++;
+    P.combo=good?P.combo+1:(lucky||(first&&rq))?P.combo:0;P.maxCombo=Math.max(P.maxCombo,P.combo);S.stats.bestCombo=Math.max(S.stats.bestCombo,P.combo);
     if(P.combo>=5)badge('combo5');if(P.combo>=10)badge('combo10');
-    if(P.run>=0){P.run=first?P.run+1:0;if(P.run>=3){badge('comeback');P.run=-1}}
-    const gain=first?2+Math.min(4,Math.floor(P.combo/3)):1;P.yarn+=gain;S.yarn+=gain;
+    if(P.run>=0){P.run=fl?P.run+1:0;if(P.run>=3){badge('comeback');P.run=-1}}
+    const gain=good?2+Math.min(4,Math.floor(P.combo/3)):(P.tries>0&&P.guessQ)?0:1;P.yarn+=gain;S.yarn+=gain;
     if(P.boss)P.joy=Math.min(P.n,P.joy+1);
-    let msg=STREAK_MSG[P.combo]||(P.tries>0||q.requeued?pick(["You fixed it! That's how brains grow 💪",'Great comeback — you kept trying!',"Nice — you didn't give up!"]):P.hintUsed?pick(['Using the clue was a smart move!','See? The trick works!']):pick(PRAISE));
-    if(little){if(first&&P.tapped){P.careful=(P.careful||0)+1;P.yarn++;S.yarn++;if(!STREAK_MSG[P.combo])msg='Careful counting! +1 bonus 🪙'}speak(cheerSay(q))}
+    let msg=(good&&STREAK_MSG[P.combo])||(lucky?'Quick tap! Look carefully first next time 👀':P.tries>0&&P.guessQ?'Right! Look carefully and you get it first time 👀':P.tries>0||rq?pick(["You fixed it! That's how brains grow 💪",'Great comeback — you kept trying!',"Nice — you didn't give up!"]):P.hintUsed?pick(['Using the clue was a smart move!','See? The trick works!']):pick(PRAISE));
+    if(little){if(fl&&P.tapped){P.careful=(P.careful||0)+1;P.yarn++;S.yarn++;if(!STREAK_MSG[P.combo])msg='Careful counting! +1 bonus 🪙'}speak(cheerSay(q))}
     setCoach(msg,'happy');
     if(ansEl){ansEl.textContent=ansShow(q);ansEl.classList.add('right')}
     card&&card.classList.add('popa');
     const comboEl=$('#combo');if(comboEl){comboEl.textContent=comboText();comboEl.classList.toggle('on',P.combo>=2);comboEl.classList.remove('bump');void comboEl.offsetWidth;comboEl.classList.add('bump')}
     sfx.correct(P.combo);
     const rr=(ansEl||card).getBoundingClientRect();burst(rr.left+rr.width/2,rr.top+rr.height/2,P.combo>=5?['🔥','⭐','✨','💖']:['✨','⭐','💖','⚔️'],8+Math.min(P.combo,10));
-    flyYarn(ansEl||card);
+    if(gain)flyYarn(ansEl||card);
     if(P.boss){const gf=$('#gface'),jb=$('#joyb');if(gf){gf.classList.remove('hit');void gf.offsetWidth;gf.classList.add('hit')}if(jb)jb.style.width=Math.min(100,P.joy/P.n*100)+'%'}
     if(P.mode==='garden'){const gr=document.querySelector('.garden-row');if(gr)gr.textContent=range(0,P.n-1).map(i=>i<P.credits.length?(P.credits[i]>0?'⚔️':'🔩'):'⬛').join('')}
-    let wait=first?800:1100;
-    if(first&&(STREAK_MSG[P.combo]||Math.random()<.3)){const d=celebrate(document.querySelector('.coachcat'));if(d)wait=Math.max(wait,d+150)}
+    let wait=fl?800:1100;
+    if(good&&(STREAK_MSG[P.combo]||Math.random()<.3)){const d=celebrate(document.querySelector('.coachcat'));if(d)wait=Math.max(wait,d+150)}
     save();setTimeout(next,wait);
   }else{
+    const quick=isQuick(q);if(quick){P.guessQ=true;P.guessN=Math.min(4,(P.guessN||0)+1);P.guesses=(P.guesses||0)+1}
     P.tries++;P.combo=0;const comboEl=$('#combo');if(comboEl)comboEl.classList.remove('on');
     sfx.wrong();card&&card.classList.remove('shake');void(card&&card.offsetWidth);card&&card.classList.add('shake');
-    if(P.mc||q.mc){q.wrongs=q.wrongs||[];q.wrongs.push(val)}
+    if((P.mc||q.mc)&&!quick){q.wrongs=q.wrongs||[];q.wrongs.push(val)}  // a wrong choice tapped in a hurry stays in play: no crossing out to narrow the odds
     if(P.tries===1&&little&&canGuide(q)){
-      const fast=Date.now()-(P.enabledAt||0)<1500;P.input='';P.hintHTML='';
-      setTimeout(()=>{if(!P)return;setCoach(fast?'Slow down! Let’s count it together ⚔️':'Let’s count it together ⚔️','think');renderPlay();if(!runGuide(q)){P.locked=false;P.hintHTML=`<div class="hint">💡 ${tip(q,false)}</div>`;renderPlay();speak(tip(q,false))}},450);
+      const fast=quick;P.input='';P.hintHTML='';
+      setTimeout(()=>{if(!P)return;setCoach(fast?'Slow down! Let’s count it together ⚔️':'Let’s count it together ⚔️','think');renderPlay();if(!runGuide(q)){P.locked=false;P.hintHTML=`<div class="hint">💡 ${tip(q,false)}</div>`;renderPlay();if(quick)guessHold();speak(tip(q,false))}},450);
     }else if(P.tries===1){
       P.input='';P.hintHTML=`<div class="hint">💡 ${tip(q,false)}</div>`;
-      setTimeout(()=>{if(!P)return;P.locked=false;setCoach(pick(['Ooh, close! Here\'s a clue.','Not quite — try once more!','Hmm, have another go. Check the clue!']),'oops');renderPlay();if(readAloud())speak('Try again. '+tip(q,false))},450);
+      setTimeout(()=>{if(!P)return;P.locked=false;P.enabledAt=Date.now();setCoach(quick?'Take your time — look carefully, then try again 👀':pick(['Ooh, close! Here\'s a clue.','Not quite — try once more!','Hmm, have another go. Check the clue!']),'oops');renderPlay();if(quick)guessHold();if(readAloud())speak('Try again. '+tip(q,false))},450);
     }else{
       recordFact(q,false);S.stats.answered++;
       if(!q.requeued){P.credits.push(0);const again=Object.assign({},q,{requeued:true,choices:null,wrongs:[]});P.qs.splice(Math.min(P.qs.length,P.i+3),0,again)}
@@ -3861,10 +3880,11 @@ function useHint(){
 function lightningSubmit(val,q){
   const a=$('#ans');P.locked=true;
   P.hofAttempts=(P.hofAttempts||0)+1;
-  if(same(val,q.ans)){P.score++;recordFact(q,true);checkCrystals(q);S.stats.answered++;S.stats.firstTry++;P.combo++;P.maxCombo=Math.max(P.maxCombo,P.combo);sfx.correct(Math.min(P.combo,12));
+  if(same(val,q.ans)){P.score++;P.wrongRun=0;recordFact(q,true);checkCrystals(q);S.stats.answered++;S.stats.firstTry++;P.combo++;P.maxCombo=Math.max(P.maxCombo,P.combo);sfx.correct(Math.min(P.combo,12));
     if(a){a.classList.add('right');const r=a.getBoundingClientRect();burst(r.left+r.width/2,r.top+r.height/2,['⚡','✨'],6)}
     setTimeout(lnext,220)}
-  else{P.combo=0;sfx.wrong();recordFact(q,false);S.stats.answered++;if(a){a.textContent=q.ans;a.classList.add('reveal')}setTimeout(lnext,900)}
+  // a wrong answer shows the right one and freezes the round for a moment (longer on a second miss in a row), so tapping at random loses far more time than it wins
+  else{P.combo=0;P.wrongRun=(P.wrongRun||0)+1;sfx.wrong();recordFact(q,false);S.stats.answered++;if(a){a.textContent=q.ans;a.classList.add('reveal')}setTimeout(lnext,P.wrongRun>=2?3200:2000)}
 }
 function lnext(){if(!P||P.mode!=='lightning'||!P.timer)return;P.qs.push(lightningQ());P.i++;P.input='';P.locked=false;P.tries=0;renderPlay()}
 function finishLightning(){
@@ -3872,7 +3892,8 @@ function finishLightning(){
   sfx.finish();if(pb&&sc>0)confetti(70);
   modal(`<h2>Time! ⚡</h2><div style="font-size:64px;font-weight:800;line-height:1">${sc}</div><p>${pb&&sc>0?'<b>New personal best!</b> 🎉':`Your best is <b>${S.stats.lightningBest}</b>. Every round makes your blade faster!`}</p><p>+${sc} 🪙</p>${practiceResultHTML()}<div class="row" style="margin-top:10px"><button class="btn sun" data-act="again">Again ↻</button><button class="btn ghost" data-act="toMap">Done</button></div>`);
 }
-function growthMsg(sc,fixed){
+function growthMsg(sc,fixed,guesses){
+  if(guesses>=2&&sc<.65)return pick(['Those were quick taps! Next time, look carefully before you answer. That is how brains learn.','Slow down and look first, then tap. A careful answer teaches your brain much more than a quick one!']);
   if(sc>=.99)return pick(['Every single one first try! All that practice is really paying off.','A perfect round! Your brain has really learned these.']);
   if(sc>=.65)return fixed?`Great work! You fixed ${fixed} tricky one${fixed>1?'s':''}. Fixing mistakes is how brains get stronger.`:'Great effort! Keep practising and these will feel easy.';
   return "That was a tough one, and you kept going! That's exactly how brains grow. Play it again any time for more stars.";
@@ -3886,9 +3907,10 @@ function breakNudge(){
 function finishLevel(){
   const R=REALMS[P.r],L=R.levels[P.l],n=P.credits.length,sc=P.credits.reduce((a,b)=>a+b,0)/Math.max(1,n);
   const stars=sc>=.9?3:sc>=.65?2:1,id=lid(P.r,P.l),prev=S.stars[id]||0;
+  const guessy=(P.guesses||0)>=2&&stars<2;  // a round of quick wrong taps: still finishes the level, but no mystery gift or bonus-game pass
   const beforeRank=rankInfo().i,beforeUnl=REALMS.map((_,i)=>realmUnlocked(i));
   S.stars[id]=Math.max(prev,stars);
-  if(P.l===R.levels.length-1)bonusRealmDone(R.id);
+  if(P.l===R.levels.length-1&&!guessy)bonusRealmDone(R.id);
   const bonus=5+stars*5+(prev?0:10);S.yarn+=bonus;P.yarn+=bonus;S.stats.levels++;
   badge('first');if(stars===3)badge('perfect');if(L.boss)badge('r_'+R.id);
   save();
@@ -3901,9 +3923,9 @@ function finishLevel(){
   modal(`<div class="lc">${L.boss?`<div class="guardian-after">${R.guardian.after}</div><h2>${R.guardian.name} is your friend now!</h2><p>${R.guardian.thanks}</p>`:`<h2>${pick(['Victory! ⚔️','Level complete!','You did it!','Huzzah! 🛡️'])}</h2>`}
    <div class="lcrow"><div id="lcCat">${catHTML(cs(120),'happy')}</div><div class="stars3">${[0,1,2].map(i=>`<span class="bigstar" id="bs${i}">★</span>`).join('')}</div></div>
    <div class="lcstats"><div><b>${firstRight}/${n}</b><small>first try</small></div>${band()==='little'?`<div><b>⚔️ ${P.careful||0}</b><small>careful counts</small></div>`:`<div><b>${P.maxCombo}</b><small>best combo</small></div>`}<div><b>+${P.yarn}</b><small>gold 🪙</small></div></div>
-   <p class="growth">${growthMsg(sc,P.fixed)}</p>
-   <div id="chestZone"><button class="chest" data-act="openChest" aria-label="Open mystery gift">🎁</button><div class="tiny">Tap the mystery gift!</div></div>
-   <div class="row" id="lcBtns" style="visibility:hidden;margin-top:10px">${btns}</div>${passBanner()}${breakNudge()}</div>`);
+   <p class="growth">${growthMsg(sc,P.fixed,P.guesses||0)}</p>
+   <div id="chestZone">${guessy?'<div class="tiny">🎁 The mystery gift comes when you look carefully and get ★★. Try again!</div>':'<button class="chest" data-act="openChest" aria-label="Open mystery gift">🎁</button><div class="tiny">Tap the mystery gift!</div>'}</div>
+   <div class="row" id="lcBtns" style="${guessy?'':'visibility:hidden;'}margin-top:10px">${btns}</div>${passBanner()}${breakNudge()}</div>`);
   for(let i=0;i<stars;i++)setTimeout(()=>{const el=$('#bs'+i);if(!el)return;el.classList.add('on');sfx.star(i);const r=el.getBoundingClientRect();burst(r.left+r.width/2,r.top+r.height/2,['⭐','✨'],10)},950+i*420);
   sfx.finish();startLcDance();if(readAloud())setTimeout(()=>speak(stars===3?'Amazing! Three stars!':stars===2?'Great job! Two stars!':'Well done! You finished the level!'),1300);
   if(stars===3)setTimeout(()=>confetti(60),1900);
@@ -3914,12 +3936,12 @@ function finishLevel(){
 function finishPractice(){
   if(!P||P.hofRecorded)return;recordPracticeRound();
   const n=P.credits.length,sc=P.credits.reduce((a,b)=>a+b,0)/Math.max(1,n),right=P.credits.filter(c=>c===1).length;
-  const bonus=10;S.yarn+=bonus;P.yarn+=bonus;const g=P.mode==='garden';if(g)badge('garden');save();
+  const guessy=(P.guesses||0)>=2&&sc<.65,bonus=guessy?5:10;S.yarn+=bonus;P.yarn+=bonus;const g=P.mode==='garden',gift=g&&!guessy;if(gift)badge('garden');save();
   modal(`<div class="lc"><div id="lcCat">${catHTML(cs(100),'happy')}</div><h2>${g?'Your blades are forged! ⚔️':P.mode==='quick'?'Practice done! 🎉':`${P.mode==='dtable'?'÷':'×'}${P.t} training done!`}</h2>${g?`<div class="bloom">${'⚔️'.repeat(Math.max(1,right))}</div>`:P.mode==='table'?`<p>×${P.t} facts that are strong: <b>${tableStrong(P.t)}/12</b></p>`:P.mode==='dtable'?`<p>÷${P.t} facts that are strong: <b>${divStrong(P.t)}/12</b></p>`:''}
    <div class="lcstats"><div><b>${right}/${n}</b><small>first try</small></div><div><b>${P.maxCombo}</b><small>best combo</small></div><div><b>+${P.yarn}</b><small>gold 🪙</small></div></div>
-   ${practiceResultHTML()}<p class="growth">${growthMsg(sc,P.fixed)}</p>
-   ${g?`<div id="chestZone"><button class="chest" data-act="openChest" aria-label="Open mystery gift">🎁</button><div class="tiny">Blacksmiths get a gift too!</div></div>`:''}
-   <div class="row" id="lcBtns" style="${g?'visibility:hidden;':''}margin-top:10px"><button class="btn" data-act="again">Again ↻</button><button class="btn ghost" data-act="toMap">Done</button></div>${passBanner()}${breakNudge()}</div>`);
+   ${practiceResultHTML()}<p class="growth">${growthMsg(sc,P.fixed,P.guesses||0)}</p>
+   ${gift?`<div id="chestZone"><button class="chest" data-act="openChest" aria-label="Open mystery gift">🎁</button><div class="tiny">Blacksmiths get a gift too!</div></div>`:g?'<div class="tiny">🎁 The garden gift comes when you look carefully. Try again!</div>':''}
+   <div class="row" id="lcBtns" style="${gift?'visibility:hidden;':''}margin-top:10px"><button class="btn" data-act="again">Again ↻</button><button class="btn ghost" data-act="toMap">Done</button></div>${passBanner()}${breakNudge()}</div>`);
   sfx.finish();startLcDance();if(sc>=.9)confetti(50);
 }
 function startLcDance(){const w=winMove(),go=()=>{const c=$('#lcCat .cat');if(!c)return;if(w)doMove(c,w);else celebrate(c)};setTimeout(go,1000);UI.lcTimer=setInterval(go,w?Math.max(2600,MOVE[w].dur+1100):2900)}
